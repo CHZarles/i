@@ -7,7 +7,7 @@ async function main() {
     {
       apiKey: process.env.OPENAI_API_KEY!,
       baseUrl: process.env.OPENAI_BASE_URL!,
-      model: "gpt-5.5",
+      model: "gpt-5.4-mini",
     },
     "Say hi",
   );

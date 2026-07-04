@@ -23,5 +23,10 @@ export async function callOpenAI(config: OpenAIConfig, prompt: string) {
     throw new Error(await res.text());
   }
 
-  return await res.json();
+  const data = await res.json();
+  return data.output
+    .flatMap((item) => item.content ?? [])
+    .filter((part) => part.type === "output_text")
+    .map((part) => part.text)
+    .join("");
 }
