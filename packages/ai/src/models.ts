@@ -1,5 +1,15 @@
-import type { Api, Model, ProviderHeaders } from "./types.ts";
 import type { ProviderAuth } from "./auth/types.ts";
+
+import type {
+  Api,
+  ApiStreamOptions,
+  AssistantMessageEventStream,
+  Context,
+  Model,
+  ProviderHeaders,
+  ProviderStreams,
+  SimpleStreamOptions,
+} from "./types.ts";
 
 export interface Provider<TApi extends Api = Api> {
   readonly id: string;
@@ -15,6 +25,18 @@ export interface Provider<TApi extends Api = Api> {
    * implementation as having no models.
    */
   getModels(): readonly Model<TApi>[];
+
+  stream<T extends TApi>(
+    model: Model<T>,
+    context: Context,
+    options?: ApiStreamOptions<T>,
+  ): AssistantMessageEventStream;
+
+  streamSimple(
+    model: Model<TApi>,
+    context: Context,
+    options?: SimpleStreamOptions,
+  ): AssistantMessageEventStream;
 }
 
 export interface CreateProviderOptions<TApi extends Api = Api> {
@@ -27,6 +49,7 @@ export interface CreateProviderOptions<TApi extends Api = Api> {
   auth: ProviderAuth;
   /** Initial model list (empty for purely dynamic providers). */
   models: readonly Model<TApi>[];
+  api: ProviderStreams;
 }
 
 export function createProvider<TApi extends Api = Api>(
@@ -39,5 +62,9 @@ export function createProvider<TApi extends Api = Api>(
     headers: input.headers,
     auth: input.auth,
     getModels: () => input.models,
+    stream: (model, context, options) =>
+      input.api.stream(model, context, options),
+    streamSimple: (model, context, options) =>
+      input.api.streamSimple(model, context, options),
   };
 }

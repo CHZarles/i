@@ -2,5 +2,8 @@
   "dependencies": {
     "dotenv": "^17.4.2"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^26.1.0"
+  }
 }
