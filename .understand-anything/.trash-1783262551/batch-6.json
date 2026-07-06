@@ -1,0 +1,189 @@
+{
+  "batchIndex": 6,
+  "batchFiles": [
+    {"path": ".codeiumignore", "language": "unknown", "sizeLines": 5, "fileCategory": "code"},
+    {"path": ".continue/rules/answer-only.md", "language": "markdown", "sizeLines": 13, "fileCategory": "docs"},
+    {"path": ".cursorignore", "language": "unknown", "sizeLines": 6, "fileCategory": "code"},
+    {"path": ".github/copilot-instructions.md", "language": "markdown", "sizeLines": 9, "fileCategory": "docs"},
+    {"path": ".understand-anything/.understandignore", "language": "unknown", "sizeLines": 21, "fileCategory": "code"},
+    {"path": ".understand-anything/config.json", "language": "json", "sizeLines": 4, "fileCategory": "config"},
+    {"path": ".understand-anything/tmp/gen-ignore.cjs", "language": "javascript", "sizeLines": 21, "fileCategory": "code"},
+    {"path": ".windsurfrules", "language": "unknown", "sizeLines": 9, "fileCategory": "code"},
+    {"path": "packages/ai/src/api/anthropic-messages.ts", "language": "typescript", "sizeLines": 47, "fileCategory": "code"},
+    {"path": "packages/ai/test/test_minimax_raw_provider.ts", "language": "typescript", "sizeLines": 23, "fileCategory": "code"}
+  ],
+  "nodes": [
+    {
+      "id": "document:.codeiumignore",
+      "type": "document",
+      "name": ".codeiumignore",
+      "filePath": ".codeiumignore",
+      "summary": "Codeium AI 客户端的忽略规则文件,用于让 Codeium 索引/补全时排除指定路径。",
+      "tags": ["ai-rules", "ignore", "codeium", "documentation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.continue/rules/answer-only.md",
+      "type": "document",
+      "name": "answer-only.md",
+      "filePath": ".continue/rules/answer-only.md",
+      "summary": "Continue AI 编辑器的回答策略规则,约束 AI 仅给出答案而不擅自修改文件。",
+      "tags": ["ai-rules", "continue", "documentation", "policy"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.cursorignore",
+      "type": "document",
+      "name": ".cursorignore",
+      "filePath": ".cursorignore",
+      "summary": "Cursor AI 编辑器的忽略规则,控制 Cursor 不索引/提示的路径集合。",
+      "tags": ["ai-rules", "cursor", "ignore", "documentation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.github/copilot-instructions.md",
+      "type": "document",
+      "name": "copilot-instructions.md",
+      "filePath": ".github/copilot-instructions.md",
+      "summary": "GitHub Copilot 的仓库级指令,告知 Copilot 在本项目中的回答行为约束。",
+      "tags": ["ai-rules", "copilot", "documentation", "policy"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.understand-anything/.understandignore",
+      "type": "document",
+      "name": ".understandignore",
+      "filePath": ".understand-anything/.understandignore",
+      "summary": "understand-anything 工具的忽略规则,声明扫描时应排除的路径(如临时产物与大型构建目录)。",
+      "tags": ["ai-rules", "ignore", "tooling", "documentation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:.understand-anything/config.json",
+      "type": "config",
+      "name": "config.json",
+      "filePath": ".understand-anything/config.json",
+      "summary": "understand-anything 工具配置,控制自动更新与输出语言(zh)。",
+      "tags": ["configuration", "tooling", "i18n"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.understand-anything/tmp/gen-ignore.cjs",
+      "type": "file",
+      "name": "gen-ignore.cjs",
+      "filePath": ".understand-anything/tmp/gen-ignore.cjs",
+      "summary": "临时脚手架脚本,遍历多个 AI 客户端忽略规则并归一化路径前缀,可分析但不归入项目本体层。",
+      "tags": ["script", "tooling", "ignore", "scaffold"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.windsurfrules",
+      "type": "document",
+      "name": ".windsurfrules",
+      "filePath": ".windsurfrules",
+      "summary": "Windsurf AI 编辑器的规则文件,描述在本项目中的回答与编辑行为策略。",
+      "tags": ["ai-rules", "windsurf", "documentation", "policy"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/src/api/anthropic-messages.ts",
+      "type": "file",
+      "name": "anthropic-messages.ts",
+      "filePath": "packages/ai/src/api/anthropic-messages.ts",
+      "summary": "Anthropic Messages API 的 transport 实现,导出 `callAnthropicMessages` 发起非流式请求并返回拼好的文本。",
+      "tags": ["transport", "anthropic", "api-handler", "http-client"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:packages/ai/src/api/anthropic-messages.ts:callAnthropicMessages",
+      "type": "function",
+      "name": "callAnthropicMessages",
+      "filePath": "packages/ai/src/api/anthropic-messages.ts",
+      "lineRange": [8, 47],
+      "summary": "向 Anthropic Messages API 发起 POST 请求,处理 401 鉴权、错误 JSON,并从响应 content 中过滤并拼接 text 块。",
+      "tags": ["transport", "anthropic", "http-client", "error-handling"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:packages/ai/test/test_minimax_raw_provider.ts",
+      "type": "file",
+      "name": "test_minimax_raw_provider.ts",
+      "filePath": "packages/ai/test/test_minimax_raw_provider.ts",
+      "summary": "针对 raw Anthropic 风格 provider 的烟雾测试,直接调用 `callAnthropicMessages` 验证 prompt 走通。",
+      "tags": ["test", "smoke-test", "anthropic", "integration"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:packages/ai/test/test_minimax_raw_provider.ts",
+      "target": "file:packages/ai/src/api/anthropic-messages.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/api/anthropic-messages.ts",
+      "target": "function:packages/ai/src/api/anthropic-messages.ts:callAnthropicMessages",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "function:packages/ai/src/api/anthropic-messages.ts:callAnthropicMessages",
+      "target": "file:packages/ai/src/api/anthropic-messages.ts",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/ai/src/api/anthropic-messages.ts",
+      "target": "file:packages/ai/test/test_minimax_raw_provider.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "function:packages/ai/src/api/anthropic-messages.ts:callAnthropicMessages",
+      "target": "file:packages/ai/test/test_minimax_raw_provider.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:.understand-anything/config.json",
+      "target": "file:.understand-anything/tmp/gen-ignore.cjs",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.understand-anything/tmp/gen-ignore.cjs",
+      "target": "document:.understand-anything/.understandignore",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.understand-anything/tmp/gen-ignore.cjs",
+      "target": "document:.codeiumignore",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.understand-anything/tmp/gen-ignore.cjs",
+      "target": "document:.cursorignore",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.understand-anything/tmp/gen-ignore.cjs",
+      "target": "document:.windsurfrules",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

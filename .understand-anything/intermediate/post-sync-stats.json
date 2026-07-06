@@ -1,0 +1,23 @@
+{
+  "totalNodes": 47,
+  "totalEdges": 88,
+  "totalLayers": 7,
+  "tourSteps": 7,
+  "nodeTypes": {
+    "file": 18,
+    "function": 13,
+    "class": 11,
+    "config": 3,
+    "document": 2
+  },
+  "edgeTypes": {
+    "imports": 26,
+    "contains": 24,
+    "exports": 9,
+    "implements": 2,
+    "depends_on": 3,
+    "calls": 17,
+    "inherits": 1,
+    "tested_by": 6
+  }
+}

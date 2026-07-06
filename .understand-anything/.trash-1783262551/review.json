@@ -1,0 +1,33 @@
+{
+  "issues": [],
+  "warnings": [
+    "Node 'document:.continue/rules/answer-only.md' has no edges (orphan)",
+    "Node 'document:.github/copilot-instructions.md' has no edges (orphan)"
+  ],
+  "stats": {
+    "totalNodes": 54,
+    "totalEdges": 96,
+    "totalLayers": 8,
+    "tourSteps": 8,
+    "nodeTypes": {
+      "file": 19,
+      "function": 13,
+      "class": 11,
+      "config": 3,
+      "document": 8
+    },
+    "edgeTypes": {
+      "imports": 26,
+      "contains": 24,
+      "exports": 9,
+      "implements": 2,
+      "depends_on": 7,
+      "calls": 17,
+      "inherits": 1,
+      "related": 1,
+      "documents": 2,
+      "configures": 1,
+      "tested_by": 6
+    }
+  }
+}

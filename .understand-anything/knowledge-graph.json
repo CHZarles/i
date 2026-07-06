@@ -1,0 +1,1536 @@
+{
+  "nodes": [
+    {
+      "id": "file:packages/ai/src/auth/helpers.ts",
+      "type": "file",
+      "name": "helpers.ts",
+      "filePath": "packages/ai/src/auth/helpers.ts",
+      "summary": "提供标准的 envApiKeyAuth 工厂函数,封装“stored credential → env 变量回退”的鉴权解析流程,供各 AI provider 复用。",
+      "tags": [
+        "auth",
+        "helper",
+        "api-key",
+        "factory"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+      "type": "function",
+      "name": "envApiKeyAuth",
+      "filePath": "packages/ai/src/auth/helpers.ts",
+      "lineRange": [
+        9,
+        35
+      ],
+      "summary": "构造一个 ApiKeyAuth:login 阶段通过回调提示用户输入密钥,resolve 阶段优先使用已存储密钥,否则按顺序尝试给定 env 变量。",
+      "tags": [
+        "auth",
+        "factory",
+        "api-key",
+        "login",
+        "resolve"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:packages/ai/src/auth/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "packages/ai/src/auth/types.ts",
+      "summary": "定义鉴权模块的全部接口契约:ModelAuth、ApiKeyCredential、AuthContext、AuthResult、AuthPrompt、AuthLoginCallbacks、ApiKeyAuth、ProviderAuth,统一 provider 鉴权抽象。",
+      "tags": [
+        "auth",
+        "type-definition",
+        "interface",
+        "contract"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:packages/ai/src/auth/types.ts:ModelAuth",
+      "type": "class",
+      "name": "ModelAuth",
+      "filePath": "packages/ai/src/auth/types.ts",
+      "lineRange": [
+        7,
+        11
+      ],
+      "summary": "单次模型请求的鉴权字段,只承载 apiKey / headers / baseUrl,其他 provider 配置不属于鉴权范畴。",
+      "tags": [
+        "interface",
+        "auth",
+        "type-definition"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:packages/ai/src/auth/types.ts:ApiKeyCredential",
+      "type": "class",
+      "name": "ApiKeyCredential",
+      "filePath": "packages/ai/src/auth/types.ts",
+      "lineRange": [
+        17,
+        21
+      ],
+      "summary": "持久化的 api-key 凭据:type 固定为 'api_key',key 为可选密钥,env 承载 provider 作用域的配置(例如 Cloudflare account/gateway id)。",
+      "tags": [
+        "interface",
+        "credential",
+        "auth"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:packages/ai/src/auth/types.ts:AuthContext",
+      "type": "class",
+      "name": "AuthContext",
+      "filePath": "packages/ai/src/auth/types.ts",
+      "lineRange": [
+        24,
+        26
+      ],
+      "summary": "鉴权阶段的环境访问抽象,通过 env(name) 异步取值,便于在测试或浏览器场景注入。",
+      "tags": [
+        "interface",
+        "auth",
+        "injectable"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:packages/ai/src/auth/types.ts:AuthResult",
+      "type": "class",
+      "name": "AuthResult",
+      "filePath": "packages/ai/src/auth/types.ts",
+      "lineRange": [
+        29,
+        35
+      ],
+      "summary": "鉴权解析结果:auth 字段承载最终 ModelAuth,env 为 provider 作用域环境,source 为可读的来源标签(如 'ANTHROPIC_API_KEY')。",
+      "tags": [
+        "interface",
+        "auth",
+        "result"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:packages/ai/src/auth/types.ts:AuthLoginCallbacks",
+      "type": "class",
+      "name": "AuthLoginCallbacks",
+      "filePath": "packages/ai/src/auth/types.ts",
+      "lineRange": [
+        48,
+        50
+      ],
+      "summary": "登录交互回调接口,prompt() 返回用户输入的密钥字符串,取消/中止时 reject。",
+      "tags": [
+        "interface",
+        "auth",
+        "login",
+        "callback"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:packages/ai/src/auth/types.ts:ApiKeyAuth",
+      "type": "class",
+      "name": "ApiKeyAuth",
+      "filePath": "packages/ai/src/auth/types.ts",
+      "lineRange": [
+        56,
+        74
+      ],
+      "summary": "ApiKey 鉴权契约:含 name 与可选的 login,以及 resolve(model, ctx, credential) 用于按字段合并 stored + ambient 来源。",
+      "tags": [
+        "interface",
+        "auth",
+        "api-key",
+        "resolve"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:packages/ai/src/auth/types.ts:ProviderAuth",
+      "type": "class",
+      "name": "ProviderAuth",
+      "filePath": "packages/ai/src/auth/types.ts",
+      "lineRange": [
+        81,
+        83
+      ],
+      "summary": "Provider 鉴权聚合根,apiKey 必须存在(即使 ambient / keyless 也要提供 apiKey 接口以表达配置状态)。",
+      "tags": [
+        "interface",
+        "auth",
+        "provider"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/src/models.ts",
+      "type": "file",
+      "name": "models.ts",
+      "filePath": "packages/ai/src/models.ts",
+      "summary": "定义 Provider / CreateProviderOptions 核心接口,提供 createProvider 工厂将元数据(模型列表、auth、stream 实现)装配为统一 Provider 实例。",
+      "tags": [
+        "provider",
+        "factory",
+        "type-definition",
+        "models"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:packages/ai/src/models.ts:Provider",
+      "type": "class",
+      "name": "Provider",
+      "filePath": "packages/ai/src/models.ts",
+      "lineRange": [
+        14,
+        40
+      ],
+      "summary": "统一 Provider 契约:携带 id / name / baseUrl / headers / auth,getModels() 返回静态目录,stream 与 streamSimple 返回 AssistantMessageEventStream。",
+      "tags": [
+        "interface",
+        "provider",
+        "stream"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:packages/ai/src/models.ts:CreateProviderOptions",
+      "type": "class",
+      "name": "CreateProviderOptions",
+      "filePath": "packages/ai/src/models.ts",
+      "lineRange": [
+        42,
+        53
+      ],
+      "summary": "createProvider 的入参契约:id/name/baseUrl/headers/auth(必填)/models(初始列表,空表示纯动态)/api(ProviderStreams)。",
+      "tags": [
+        "interface",
+        "provider",
+        "options"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/src/models.ts:createProvider",
+      "type": "function",
+      "name": "createProvider",
+      "filePath": "packages/ai/src/models.ts",
+      "lineRange": [
+        55,
+        70
+      ],
+      "summary": "工厂函数:把 CreateProviderOptions 装配成 Provider 实例,getModels 直接返回入参列表,stream/streamSimple 转发到 input.api。",
+      "tags": [
+        "factory",
+        "provider",
+        "assembly"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/test/test_auth.ts",
+      "type": "file",
+      "name": "test_auth.ts",
+      "filePath": "packages/ai/test/test_auth.ts",
+      "summary": "最小化烟测脚本:用 OPENAI_API_KEY env 变量名构造 envApiKeyAuth,传入假 ctx.env(读 process.env),打印 resolve 结果以人工/运行期验证。",
+      "tags": [
+        "test",
+        "auth",
+        "smoke-test"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/test/test_models.ts",
+      "type": "file",
+      "name": "test_models.ts",
+      "filePath": "packages/ai/test/test_models.ts",
+      "summary": "最小化烟测脚本:用 createProvider 构造 OpenAI provider,打印 provider.id 与首个 model id,验证装配流程。",
+      "tags": [
+        "test",
+        "provider",
+        "smoke-test"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/src/api/openai-responses.lazy.ts",
+      "type": "file",
+      "name": "openai-responses.lazy.ts",
+      "filePath": "packages/ai/src/api/openai-responses.lazy.ts",
+      "summary": "openai-responses 模块的惰性包装层,把 openai-responses 命名空间导出转为符合 ProviderStreams 形状的对象，供 provider 注册中心在按需加载时引用。",
+      "tags": [
+        "entry-point",
+        "api-handler",
+        "lazy-load",
+        "provider",
+        "wrapper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/src/api/openai-responses.lazy.ts:openAIResponsesApi",
+      "type": "function",
+      "name": "openAIResponsesApi",
+      "filePath": "packages/ai/src/api/openai-responses.lazy.ts",
+      "lineRange": [
+        4,
+        4
+      ],
+      "summary": "返回符合 ProviderStreams 接口的对象，把 openai-responses 模块的 stream/streamSimple 流函数统一暴露给上层 provider。",
+      "tags": [
+        "factory",
+        "provider",
+        "api-handler"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/src/api/openai-responses.ts",
+      "type": "file",
+      "name": "openai-responses.ts",
+      "filePath": "packages/ai/src/api/openai-responses.ts",
+      "summary": "OpenAI Responses API 的流式适配实现：把消息上下文转换为 prompt、调用 /responses 端点、解析输出文本与 usage，并产出 AssistantMessageEventStream。",
+      "tags": [
+        "api-handler",
+        "stream",
+        "openai",
+        "provider",
+        "transport"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:packages/ai/src/api/openai-responses.ts:promptFromContext",
+      "type": "function",
+      "name": "promptFromContext",
+      "filePath": "packages/ai/src/api/openai-responses.ts",
+      "lineRange": [
+        30,
+        35
+      ],
+      "summary": "从 Context 中反向查找最近一条 user 消息并返回其内容字符串，作为单轮 prompt 文本。",
+      "tags": [
+        "utility",
+        "context",
+        "prompt"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/src/api/openai-responses.ts:usageFromResponse",
+      "type": "function",
+      "name": "usageFromResponse",
+      "filePath": "packages/ai/src/api/openai-responses.ts",
+      "lineRange": [
+        37,
+        48
+      ],
+      "summary": "把 OpenAI Responses 响应里的 usage 字段映射为统一的 Usage 结构（含成本占位字段），缺失值用 0 兜底。",
+      "tags": [
+        "utility",
+        "usage",
+        "normalization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/src/api/openai-responses.ts:outputText",
+      "type": "function",
+      "name": "outputText",
+      "filePath": "packages/ai/src/api/openai-responses.ts",
+      "lineRange": [
+        50,
+        57
+      ],
+      "summary": "从响应体中提取最终文本：优先 output_text，否则从 output[].content[] 中筛 output_text 片段拼接。",
+      "tags": [
+        "utility",
+        "parser",
+        "text"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/src/api/openai-responses.ts:createMessage",
+      "type": "function",
+      "name": "createMessage",
+      "filePath": "packages/ai/src/api/openai-responses.ts",
+      "lineRange": [
+        59,
+        75
+      ],
+      "summary": "构造统一的 AssistantMessage 对象，包含 role、content、api/provider/model 元数据、usage 与 timestamp。",
+      "tags": [
+        "factory",
+        "data-model",
+        "message"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/src/api/openai-responses.ts:createErrorMessage",
+      "type": "function",
+      "name": "createErrorMessage",
+      "filePath": "packages/ai/src/api/openai-responses.ts",
+      "lineRange": [
+        77,
+        86
+      ],
+      "summary": "在调用失败时构造 stopReason 为 error 的 AssistantMessage，并把 Error.message 或 String(error) 写入 errorMessage。",
+      "tags": [
+        "factory",
+        "error-handling",
+        "message"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/src/api/openai-responses.ts:streamSimple",
+      "type": "function",
+      "name": "streamSimple",
+      "filePath": "packages/ai/src/api/openai-responses.ts",
+      "lineRange": [
+        88,
+        131
+      ],
+      "summary": "StreamFunction 主入口：异步调用 OpenAI /responses 端点，按 start→done/error 顺序向 AssistantMessageEventStream 推送事件，并把最终消息经 stream.end 关闭。",
+      "tags": [
+        "api-handler",
+        "stream",
+        "transport",
+        "fetch"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:packages/ai/src/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "packages/ai/src/types.ts",
+      "summary": "ai 包的核心类型中枢：定义 provider 公共类型 Model、Message、Usage、Context、AssistantMessageEventStream、ProviderStreams、StreamFunction 等，所有 provider 模块共享此契约。",
+      "tags": [
+        "type-definition",
+        "core",
+        "provider",
+        "data-model"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:packages/ai/src/utils/event-stream.ts",
+      "type": "file",
+      "name": "event-stream.ts",
+      "filePath": "packages/ai/src/utils/event-stream.ts",
+      "summary": "通用 SSE 事件流解析器：实现 EventStream 泛型 AsyncIterable 队列，并特化出 AssistantMessageEventStream，供各 provider 流函数推送 start/done/error 事件并由消费端异步迭代。",
+      "tags": [
+        "utility",
+        "stream",
+        "async-iter",
+        "event-stream",
+        "queue"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:packages/ai/src/utils/event-stream.ts:EventStream",
+      "type": "class",
+      "name": "EventStream",
+      "filePath": "packages/ai/src/utils/event-stream.ts",
+      "lineRange": [
+        3,
+        67
+      ],
+      "summary": "泛型事件流容器：维护事件队列与等待者列表，支持 push/end/异步迭代，并暴露 finalResultPromise 给消费者在流结束后取最终结果。",
+      "tags": [
+        "stream",
+        "async-iter",
+        "event-stream",
+        "generic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:packages/ai/src/utils/event-stream.ts:AssistantMessageEventStream",
+      "type": "class",
+      "name": "AssistantMessageEventStream",
+      "filePath": "packages/ai/src/utils/event-stream.ts",
+      "lineRange": [
+        69,
+        83
+      ],
+      "summary": "EventStream 的 assistant message 特化版本：以 AssistantMessageEvent 为事件类型、AssistantMessage 为终值，done/error 事件触发终结。",
+      "tags": [
+        "stream",
+        "specialization",
+        "event-stream",
+        "domain-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/src/providers/openai.models.ts",
+      "type": "file",
+      "name": "openai.models.ts",
+      "filePath": "packages/ai/src/providers/openai.models.ts",
+      "summary": "OpenAI provider 的静态模型目录,导出只读常量 OPENAI_MODELS,目前包含单个 gpt-5.4-mini 条目,所有条目以 satisfies Model<\"openai-responses\"> 进行类型约束。",
+      "tags": [
+        "provider",
+        "model-catalog",
+        "constant",
+        "typescript",
+        "configuration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/src/providers/openai.ts",
+      "type": "file",
+      "name": "openai.ts",
+      "filePath": "packages/ai/src/providers/openai.ts",
+      "summary": "OpenAI provider 入口,导出工厂函数 openaiProvider():它把环境变量鉴权、模型列表与 openai-responses transport 装配成一个统一的 Provider<\"openai-responses\">,供全局 provider 列表注册使用。",
+      "tags": [
+        "provider",
+        "factory",
+        "entry-point",
+        "registration",
+        "openai"
+      ],
+      "complexity": "simple",
+      "languageNotes": "通过 satisfies-style 类型友好的 createProvider 模式组装 provider,使用 envApiKeyAuth 实现统一鉴权抽象。"
+    },
+    {
+      "id": "file:packages/ai/test/test_openai_provider.ts",
+      "type": "file",
+      "name": "test_openai_provider.ts",
+      "filePath": "packages/ai/test/test_openai_provider.ts",
+      "summary": "针对 openaiProvider 的轻量级 smoke test:实例化 provider 后打印 id、name、baseUrl 与首个模型 id,不做断言,只用于本地快速验证 provider 装配成功。",
+      "tags": [
+        "test",
+        "smoke-test",
+        "provider",
+        "openai"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/test/test_openai_provider_stream.ts",
+      "type": "file",
+      "name": "test_openai_provider_stream.ts",
+      "filePath": "packages/ai/test/test_openai_provider_stream.ts",
+      "summary": "针对 openaiProvider 的端到端 streaming 验证脚本:读取 .env 中的 API key 与可选 baseUrl,发起一次 OpenAI Responses API 的 streamSimple 调用并把首条回复的文本连接后打印,失败时 exit 1。",
+      "tags": [
+        "test",
+        "e2e",
+        "streaming",
+        "sse",
+        "openai",
+        "dotenv"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "使用 dotenv 的 override 模式,允许环境变量被 .env 强制覆盖,适合本地调试。"
+    },
+    {
+      "id": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+      "type": "function",
+      "name": "openaiProvider",
+      "filePath": "packages/ai/src/providers/openai.ts",
+      "lineRange": [
+        6,
+        17
+      ],
+      "summary": "OpenAI provider 工厂函数:返回 createProvider({...}) 生成的 Provider<\"openai-responses\">,绑定环境变量鉴权、模型枚举与 openAIResponsesApi transport。",
+      "tags": [
+        "factory",
+        "provider",
+        "registration",
+        "openai"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/test/test_openai_provider_stream.ts:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "packages/ai/test/test_openai_provider_stream.ts",
+      "lineRange": [
+        6,
+        35
+      ],
+      "summary": "异步 e2e 入口:实例化 openaiProvider、读取默认模型、构造请求模型、发起 streamSimple 并把首条 assistant 消息的文本 part 拼接后打印;任意阶段报错都会被外层 main().catch 捕获后退出码 1。",
+      "tags": [
+        "test",
+        "e2e",
+        "streaming",
+        "async",
+        "openai"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:packages/ai/src/providers/minimax.models.ts",
+      "type": "file",
+      "name": "minimax.models.ts",
+      "filePath": "packages/ai/src/providers/minimax.models.ts",
+      "summary": "声明 MiniMax provider 支持的模型静态表(MINIMAX_MODELS),使用 satisfies 约束 API 类型为 anthropic-messages,提供 1M 上下文窗口与 128K 最大输出。",
+      "tags": [
+        "provider",
+        "model-registry",
+        "static-data",
+        "configuration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/src/providers/minimax.ts",
+      "type": "file",
+      "name": "minimax.ts",
+      "filePath": "packages/ai/src/providers/minimax.ts",
+      "summary": "MiniMax provider 的注册入口,导出 minimaxProvider 工厂函数,通过 createProvider 装配 id/baseUrl/auth/模型列表,绑定 MINIMAX_API_KEY 环境变量鉴权。",
+      "tags": [
+        "provider",
+        "factory",
+        "registration",
+        "anthropic-messages"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/test/test_minimax_provider.ts",
+      "type": "file",
+      "name": "test_minimax_provider.ts",
+      "filePath": "packages/ai/test/test_minimax_provider.ts",
+      "summary": "对 minimaxProvider 的烟雾测试脚本,实例化 provider 后打印 id/name/baseUrl、首个模型元数据,并通过 envApiKeyAuth.resolve 解析鉴权来源。",
+      "tags": [
+        "test",
+        "smoke-test",
+        "provider",
+        "runtime-check"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/src/providers/minimax.ts:minimaxProvider",
+      "type": "function",
+      "name": "minimaxProvider",
+      "filePath": "packages/ai/src/providers/minimax.ts",
+      "lineRange": [
+        5,
+        15
+      ],
+      "summary": "返回配置好的 Provider<\"anthropic-messages\">:固定 baseUrl 指向 api.minimax.io/anthropic,通过 envApiKeyAuth 读取 MINIMAX_API_KEY,并展开 MINIMAX_MODELS 作为可用模型列表。",
+      "tags": [
+        "factory",
+        "provider",
+        "registration",
+        "anthropic-messages"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:.env",
+      "type": "config",
+      "name": ".env",
+      "filePath": ".env",
+      "summary": "工作区根级环境变量配置,集中放置 OpenAI 与 MiniMax provider 的鉴权 key、base URL 以及 Node 代理开关,供运行时 dotenv 加载。",
+      "tags": [
+        "configuration",
+        "environment",
+        "secrets",
+        "provider-config",
+        "runtime"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "package.json",
+      "summary": "工作区根 manifest,声明 ESM (`type: module`)、唯一运行时依赖 `dotenv`,以及开发依赖 `@types/node`,无 scripts 字段,作为 monorepo 根级公共配置。",
+      "tags": [
+        "configuration",
+        "manifest",
+        "monorepo",
+        "esm",
+        "dotenv"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.codeiumignore",
+      "type": "document",
+      "name": ".codeiumignore",
+      "filePath": ".codeiumignore",
+      "summary": "Codeium AI 客户端的忽略规则文件,用于让 Codeium 索引/补全时排除指定路径。",
+      "tags": [
+        "ai-rules",
+        "ignore",
+        "codeium",
+        "documentation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.understand-anything/.understandignore",
+      "type": "document",
+      "name": ".understandignore",
+      "filePath": ".understand-anything/.understandignore",
+      "summary": "understand-anything 工具的忽略规则,声明扫描时应排除的路径(如临时产物与大型构建目录)。",
+      "tags": [
+        "ai-rules",
+        "ignore",
+        "tooling",
+        "documentation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:.understand-anything/config.json",
+      "type": "config",
+      "name": "config.json",
+      "filePath": ".understand-anything/config.json",
+      "summary": "understand-anything 工具配置,控制自动更新与输出语言(zh)。",
+      "tags": [
+        "configuration",
+        "tooling",
+        "i18n"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/src/api/anthropic-messages.ts",
+      "type": "file",
+      "name": "anthropic-messages.ts",
+      "filePath": "packages/ai/src/api/anthropic-messages.ts",
+      "summary": "Anthropic Messages API 的 transport 实现,导出 `callAnthropicMessages` 发起非流式请求并返回拼好的文本。",
+      "tags": [
+        "transport",
+        "anthropic",
+        "api-handler",
+        "http-client"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:packages/ai/src/api/anthropic-messages.ts:callAnthropicMessages",
+      "type": "function",
+      "name": "callAnthropicMessages",
+      "filePath": "packages/ai/src/api/anthropic-messages.ts",
+      "lineRange": [
+        8,
+        47
+      ],
+      "summary": "向 Anthropic Messages API 发起 POST 请求,处理 401 鉴权、错误 JSON,并从响应 content 中过滤并拼接 text 块。",
+      "tags": [
+        "transport",
+        "anthropic",
+        "http-client",
+        "error-handling"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:packages/ai/test/test_minimax_raw_provider.ts",
+      "type": "file",
+      "name": "test_minimax_raw_provider.ts",
+      "filePath": "packages/ai/test/test_minimax_raw_provider.ts",
+      "summary": "针对 raw Anthropic 风格 provider 的烟雾测试,直接调用 `callAnthropicMessages` 验证 prompt 走通。",
+      "tags": [
+        "test",
+        "smoke-test",
+        "anthropic",
+        "integration"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:packages/ai/src/auth/helpers.ts",
+      "target": "file:packages/ai/src/auth/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/auth/helpers.ts",
+      "target": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/auth/helpers.ts",
+      "target": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+      "target": "class:packages/ai/src/auth/types.ts:ApiKeyAuth",
+      "type": "implements",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:packages/ai/src/auth/types.ts",
+      "target": "class:packages/ai/src/auth/types.ts:ModelAuth",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/auth/types.ts",
+      "target": "class:packages/ai/src/auth/types.ts:ApiKeyCredential",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/auth/types.ts",
+      "target": "class:packages/ai/src/auth/types.ts:AuthContext",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/auth/types.ts",
+      "target": "class:packages/ai/src/auth/types.ts:AuthResult",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/auth/types.ts",
+      "target": "class:packages/ai/src/auth/types.ts:AuthLoginCallbacks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/auth/types.ts",
+      "target": "class:packages/ai/src/auth/types.ts:ApiKeyAuth",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/auth/types.ts",
+      "target": "class:packages/ai/src/auth/types.ts:ProviderAuth",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/models.ts",
+      "target": "file:packages/ai/src/auth/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/models.ts",
+      "target": "class:packages/ai/src/auth/types.ts:ProviderAuth",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:packages/ai/src/models.ts",
+      "target": "class:packages/ai/src/models.ts:Provider",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/models.ts",
+      "target": "class:packages/ai/src/models.ts:CreateProviderOptions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/models.ts",
+      "target": "function:packages/ai/src/models.ts:createProvider",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/models.ts",
+      "target": "function:packages/ai/src/models.ts:createProvider",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/models.ts:createProvider",
+      "target": "class:packages/ai/src/models.ts:Provider",
+      "type": "implements",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:packages/ai/test/test_auth.ts",
+      "target": "file:packages/ai/src/auth/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/test/test_auth.ts",
+      "target": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/ai/test/test_models.ts",
+      "target": "file:packages/ai/src/auth/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/test/test_models.ts",
+      "target": "file:packages/ai/src/models.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/test/test_models.ts",
+      "target": "function:packages/ai/src/models.ts:createProvider",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/ai/test/test_models.ts",
+      "target": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.lazy.ts",
+      "target": "file:packages/ai/src/api/openai-responses.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.lazy.ts",
+      "target": "file:packages/ai/src/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.lazy.ts",
+      "target": "function:packages/ai/src/api/openai-responses.lazy.ts:openAIResponsesApi",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.lazy.ts",
+      "target": "function:packages/ai/src/api/openai-responses.lazy.ts:openAIResponsesApi",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "file:packages/ai/src/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "file:packages/ai/src/utils/event-stream.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "function:packages/ai/src/api/openai-responses.ts:promptFromContext",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "function:packages/ai/src/api/openai-responses.ts:usageFromResponse",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "function:packages/ai/src/api/openai-responses.ts:outputText",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "function:packages/ai/src/api/openai-responses.ts:createMessage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "function:packages/ai/src/api/openai-responses.ts:createErrorMessage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "function:packages/ai/src/api/openai-responses.ts:streamSimple",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "function:packages/ai/src/api/openai-responses.ts:streamSimple",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/api/openai-responses.ts:createMessage",
+      "target": "function:packages/ai/src/api/openai-responses.ts:usageFromResponse",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/api/openai-responses.ts:createErrorMessage",
+      "target": "function:packages/ai/src/api/openai-responses.ts:createMessage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/api/openai-responses.ts:streamSimple",
+      "target": "function:packages/ai/src/api/openai-responses.ts:createMessage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/api/openai-responses.ts:streamSimple",
+      "target": "function:packages/ai/src/api/openai-responses.ts:promptFromContext",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/api/openai-responses.ts:streamSimple",
+      "target": "function:packages/ai/src/api/openai-responses.ts:outputText",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/api/openai-responses.ts:streamSimple",
+      "target": "function:packages/ai/src/api/openai-responses.ts:createErrorMessage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/api/openai-responses.ts:streamSimple",
+      "target": "class:packages/ai/src/utils/event-stream.ts:AssistantMessageEventStream",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:packages/ai/src/types.ts",
+      "target": "file:packages/ai/src/utils/event-stream.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/utils/event-stream.ts",
+      "target": "file:packages/ai/src/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/utils/event-stream.ts",
+      "target": "class:packages/ai/src/utils/event-stream.ts:EventStream",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/utils/event-stream.ts",
+      "target": "class:packages/ai/src/utils/event-stream.ts:EventStream",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/ai/src/utils/event-stream.ts",
+      "target": "class:packages/ai/src/utils/event-stream.ts:AssistantMessageEventStream",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/utils/event-stream.ts",
+      "target": "class:packages/ai/src/utils/event-stream.ts:AssistantMessageEventStream",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:packages/ai/src/utils/event-stream.ts:AssistantMessageEventStream",
+      "target": "class:packages/ai/src/utils/event-stream.ts:EventStream",
+      "type": "inherits",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:packages/ai/src/providers/openai.models.ts",
+      "target": "file:packages/ai/src/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/providers/openai.ts",
+      "target": "file:packages/ai/src/api/openai-responses.lazy.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/providers/openai.ts",
+      "target": "file:packages/ai/src/auth/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/providers/openai.ts",
+      "target": "file:packages/ai/src/models.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/providers/openai.ts",
+      "target": "file:packages/ai/src/providers/openai.models.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/test/test_openai_provider.ts",
+      "target": "file:packages/ai/src/providers/openai.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/test/test_openai_provider_stream.ts",
+      "target": "file:packages/ai/src/providers/openai.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/providers/openai.ts",
+      "target": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/test/test_openai_provider_stream.ts",
+      "target": "function:packages/ai/test/test_openai_provider_stream.ts:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/providers/openai.ts",
+      "target": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+      "target": "file:packages/ai/src/models.ts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+      "target": "file:packages/ai/src/auth/helpers.ts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+      "target": "file:packages/ai/src/api/openai-responses.lazy.ts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/test/test_openai_provider_stream.ts:main",
+      "target": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/ai/src/providers/minimax.models.ts",
+      "target": "file:packages/ai/src/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/providers/minimax.ts",
+      "target": "file:packages/ai/src/auth/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/providers/minimax.ts",
+      "target": "file:packages/ai/src/models.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/providers/minimax.ts",
+      "target": "file:packages/ai/src/providers/minimax.models.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/test/test_minimax_provider.ts",
+      "target": "file:packages/ai/src/providers/minimax.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/providers/minimax.models.ts",
+      "target": "function:packages/ai/src/providers/minimax.ts:minimaxProvider",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:packages/ai/src/providers/minimax.models.ts",
+      "target": "function:packages/ai/src/providers/minimax.ts:minimaxProvider",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/providers/minimax.ts:minimaxProvider",
+      "target": "function:packages/ai/src/models.ts:createProvider",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/providers/minimax.ts:minimaxProvider",
+      "target": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "config:.env",
+      "target": "config:package.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:packages/ai/test/test_minimax_raw_provider.ts",
+      "target": "file:packages/ai/src/api/anthropic-messages.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/api/anthropic-messages.ts",
+      "target": "function:packages/ai/src/api/anthropic-messages.ts:callAnthropicMessages",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "function:packages/ai/src/api/anthropic-messages.ts:callAnthropicMessages",
+      "target": "file:packages/ai/src/api/anthropic-messages.ts",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/ai/src/auth/types.ts",
+      "target": "file:packages/ai/src/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7,
+      "recoveredFromImportMap": true
+    },
+    {
+      "source": "file:packages/ai/src/models.ts",
+      "target": "file:packages/ai/src/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7,
+      "recoveredFromImportMap": true
+    },
+    {
+      "source": "file:packages/ai/src/auth/helpers.ts",
+      "target": "file:packages/ai/test/test_auth.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:packages/ai/src/models.ts",
+      "target": "file:packages/ai/test/test_models.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:packages/ai/src/providers/openai.ts",
+      "target": "file:packages/ai/test/test_openai_provider.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:packages/ai/src/providers/openai.ts",
+      "target": "file:packages/ai/test/test_openai_provider_stream.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:packages/ai/src/providers/minimax.ts",
+      "target": "file:packages/ai/test/test_minimax_provider.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:packages/ai/src/api/anthropic-messages.ts",
+      "target": "file:packages/ai/test/test_minimax_raw_provider.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+      "target": "function:packages/ai/src/models.ts:createProvider",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+      "target": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ],
+  "layers": [
+    {
+      "id": "layer:type-definitions",
+      "name": "类型定义层",
+      "description": "ai 包的核心类型中枢,定义 Model、Message、Usage、Context、ProviderStreams、StreamFunction 等公共契约,并通过 EventStream 泛型队列与 AssistantMessageEventStream 特化为 SSE 流式事件容器,被所有上层模块共享引用(fan-in 最高)。",
+      "nodeIds": [
+        "file:packages/ai/src/types.ts",
+        "file:packages/ai/src/utils/event-stream.ts"
+      ]
+    },
+    {
+      "id": "layer:api-transport",
+      "name": "API 与传输层",
+      "description": "与上游 LLM 服务直接通信的 transport 模块:openai-responses.ts 实现 OpenAI Responses API 流式适配并产出 AssistantMessageEventStream,openai-responses.lazy.ts 提供按需加载的惰性包装,anthropic-messages.ts 实现 Anthropic Messages API 的非流式 POST 调用。",
+      "nodeIds": [
+        "file:packages/ai/src/api/openai-responses.ts",
+        "file:packages/ai/src/api/openai-responses.lazy.ts",
+        "file:packages/ai/src/api/anthropic-messages.ts"
+      ]
+    },
+    {
+      "id": "layer:auth-abstraction",
+      "name": "鉴权抽象层",
+      "description": "统一 provider 鉴权抽象:auth/types.ts 定义 ModelAuth/ApiKeyAuth/ProviderAuth 等接口契约,auth/helpers.ts 提供 envApiKeyAuth 工厂,封装 stored credential → env 变量回退的鉴权解析流程,供各 provider 复用。",
+      "nodeIds": [
+        "file:packages/ai/src/auth/types.ts",
+        "file:packages/ai/src/auth/helpers.ts"
+      ]
+    },
+    {
+      "id": "layer:provider-registry",
+      "name": "Provider 注册层",
+      "description": "Provider 装配与注册中心:models.ts 通过 createProvider 工厂把模型列表、auth、stream 实现装配成统一 Provider 实例;providers/openai.ts 与 providers/minimax.ts 分别为 OpenAI Responses 与 MiniMax(Anthropic Messages 兼容)provider 提供注册入口,*.models.ts 声明各自的静态模型目录并以 satisfies 约束类型。",
+      "nodeIds": [
+        "file:packages/ai/src/models.ts",
+        "file:packages/ai/src/providers/openai.ts",
+        "file:packages/ai/src/providers/openai.models.ts",
+        "file:packages/ai/src/providers/minimax.ts",
+        "file:packages/ai/src/providers/minimax.models.ts"
+      ]
+    },
+    {
+      "id": "layer:test-suite",
+      "name": "测试层",
+      "description": "packages/ai/test 下的轻量级 smoke / e2e 脚本集合:覆盖 envApiKeyAuth 鉴权解析、createProvider 装配流程、openaiProvider / minimaxProvider 实例化与流式输出、以及对 raw Anthropic Messages API 的集成验证,失败时以 exit 1 终止。",
+      "nodeIds": [
+        "file:packages/ai/test/test_auth.ts",
+        "file:packages/ai/test/test_models.ts",
+        "file:packages/ai/test/test_openai_provider.ts",
+        "file:packages/ai/test/test_openai_provider_stream.ts",
+        "file:packages/ai/test/test_minimax_provider.ts",
+        "file:packages/ai/test/test_minimax_raw_provider.ts"
+      ]
+    },
+    {
+      "id": "layer:workspace-config",
+      "name": "工作区配置",
+      "description": "monorepo 根级 manifest 与运行时配置:package.json 声明 ESM 与 dotenv 依赖,.env 集中放置 OpenAI / MiniMax provider 的鉴权 key、baseUrl 与 Node 代理开关,.understand-anything/config.json 控制扫描工具行为,以及 tmp/gen-ignore.cjs 临时脚手架脚本。",
+      "nodeIds": [
+        "config:package.json",
+        "config:.env",
+        "config:.understand-anything/config.json"
+      ]
+    },
+    {
+      "id": "layer:ai-client-rules",
+      "name": "AI 客户端规则",
+      "description": "多种 AI 编辑器 / 补全客户端在本仓库的忽略规则与回答策略:Codeium、Cursor、Windsurf、Continue、GitHub Copilot、understand-anything 等各自的 ignore 或 policy 文件,约束 AI 客户端在本目录下的索引范围与回答行为。",
+      "nodeIds": [
+        "document:.codeiumignore",
+        "document:.understand-anything/.understandignore"
+      ]
+    }
+  ],
+  "tour": [
+    {
+      "order": 2,
+      "title": "工作区根 manifest 与运行时配置",
+      "description": "`package.json` 把仓库声明为纯 ESM workspace,仅以 `dotenv` 为运行时依赖,体现 KISS/YAGNI;`.env` 集中放置 OpenAI 与 MiniMax 的 API key、baseUrl 与 Node 代理,正是后续 `envApiKeyAuth` 工厂读取的来源。把根配置放在一起看,可以快速理解包外没有任何构建脚手架。",
+      "nodeIds": [
+        "config:package.json",
+        "config:.env"
+      ]
+    },
+    {
+      "order": 3,
+      "title": "类型契约底层:provider 公共类型与 SSE 流",
+      "description": "`src/types.ts` 定义 `Model`、`Message`、`Usage`、`Context`、`AssistantMessageEventStream` 等所有 provider 共享的契约;`utils/event-stream.ts` 在此之上实现通用 `EventStream<T>` 异步队列,并特化出 `AssistantMessageEventStream`。这一层是 BFS 的最深处,所有 transport 与 provider 都依赖它,先把“流是什么”钉死才能往上盖协议。",
+      "nodeIds": [
+        "file:packages/ai/src/types.ts",
+        "file:packages/ai/src/utils/event-stream.ts"
+      ],
+      "languageLesson": "`EventStream<T>` 是基于 Promise 队列手写的 AsyncIterable,既支持 `for await` 又能 `push/close`,比直接套第三方流库更轻,符合 KISS。"
+    },
+    {
+      "order": 4,
+      "title": "鉴权抽象与 env 工厂",
+      "description": "`auth/types.ts` 给出统一契约:`ModelAuth` 描述单次请求的鉴权字段,`ApiKeyAuth` + `ProviderAuth` 描述 provider 级别的持久化与解析流程,`AuthContext` 用 `env(name)` 抽象进程外配置访问。`auth/helpers.ts` 的 `envApiKeyAuth` 工厂封装“stored credential → env 回退”的标准解析,后续两个 provider 直接复用,避免重复造轮子。",
+      "nodeIds": [
+        "file:packages/ai/src/auth/types.ts",
+        "file:packages/ai/src/auth/helpers.ts"
+      ]
+    },
+    {
+      "order": 5,
+      "title": "Provider 注册中心:createProvider 装配",
+      "description": "`src/models.ts` 定义 `Provider` 与 `CreateProviderOptions` 接口,提供 `createProvider` 工厂把模型列表 + auth + stream 三段拼成一个 provider 实例。这一步是 BFS 的入口点,也是整套架构的“总装车间”——理解它就理解了为什么 OpenAI 与 MiniMax 都能用同一个 `createProvider` 装配出来。",
+      "nodeIds": [
+        "file:packages/ai/src/models.ts"
+      ],
+      "languageLesson": "`createProvider` 的实现常用 `satisfies Provider` 约束返回类型,既保留字面量推导又强制契约,非常适合工厂装配模式。"
+    },
+    {
+      "order": 6,
+      "title": "OpenAI provider:Responses API 流式实现",
+      "description": "`providers/openai.ts` 调 `createProvider` 装配 OpenAI;`providers/openai.models.ts` 用 `satisfies` 暴露 `OPENAI_MODELS` 静态目录;`api/openai-responses.ts` 把 `Context` 转为 prompt、调 `/responses` 端点、产出 `AssistantMessageEventStream`;`api/openai-responses.lazy.ts` 把命名空间导出惰性包装成 `ProviderStreams`。这一步展示“一个 provider + 一个 transport + 一个模型表”的最小三角。",
+      "nodeIds": [
+        "file:packages/ai/src/providers/openai.ts",
+        "file:packages/ai/src/providers/openai.models.ts",
+        "file:packages/ai/src/api/openai-responses.ts",
+        "file:packages/ai/src/api/openai-responses.lazy.ts"
+      ],
+      "languageLesson": "`.lazy.ts` 通过 getter/proxy 把 `import` 延迟到首次调用,降低包启动成本,适合大 SDK 按需加载子模块。"
+    },
+    {
+      "order": 7,
+      "title": "MiniMax provider 与 Anthropic Messages 复用",
+      "description": "`providers/minimax.ts` 同样走 `createProvider`,但底层 transport 复用 `api/anthropic-messages.ts`(Anthropic Messages API 兼容);`providers/minimax.models.ts` 用 `satisfies anthropic-messages` 类型锚定 API 契约。这一步揭示了“同一个 provider 装配接口、不同 transport”的复用方式,新增 MiniMax-M 系列只需再添一行模型表。",
+      "nodeIds": [
+        "file:packages/ai/src/providers/minimax.ts",
+        "file:packages/ai/src/providers/minimax.models.ts",
+        "file:packages/ai/src/api/anthropic-messages.ts"
+      ]
+    },
+    {
+      "order": 8,
+      "title": "测试与回归:smoke + e2e 双层校验",
+      "description": "`test_*.ts` 系列既覆盖纯装配路径(`test_auth.ts`、`test_models.ts`、`test_openai_provider.ts` smoke 验证工厂与目录),也覆盖真实端到端(`test_openai_provider_stream.ts` 触发流式响应,`test_minimax_provider.ts` 走 MiniMax,`test_minimax_raw_provider.ts` 直接调 raw Anthropic transport)。失败一律 exit 1,可直接挂 CI,符合 draft 中“测试覆盖核心逻辑,不追求假覆盖”的规范。",
+      "nodeIds": [
+        "file:packages/ai/test/test_auth.ts",
+        "file:packages/ai/test/test_models.ts",
+        "file:packages/ai/test/test_openai_provider.ts",
+        "file:packages/ai/test/test_openai_provider_stream.ts",
+        "file:packages/ai/test/test_minimax_provider.ts",
+        "file:packages/ai/test/test_minimax_raw_provider.ts"
+      ],
+      "languageLesson": "TypeScript 测试脚本直接用 `tsx`/`node --import` 运行,既无需 Jest 也能覆盖 import 链,体现了“最小测试栈 = Vitest 或 Jest”的规范选择空间。"
+    }
+  ],
+  "version": "1.0.0",
+  "project": {
+    "name": "i",
+    "languages": [
+      "typescript",
+      "json",
+      "markdown"
+    ],
+    "frameworks": [],
+    "description": "轻量 TypeScript ESM monorepo,核心包 packages/ai 提供 AI provider 注册与转发,支持 OpenAI Responses API、Anthropic Messages API 与 MiniMax provider,带 SSE 事件流解析与统一鉴权抽象。",
+    "analyzedAt": "2026-07-05T14:41:51.336Z",
+    "gitCommitHash": "24516d4e70f17c9713e6875a738340591d4b3c0b"
+  }
+}

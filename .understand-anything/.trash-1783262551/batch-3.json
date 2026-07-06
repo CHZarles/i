@@ -1,0 +1,176 @@
+{
+  "nodes": [
+    {
+      "id": "file:packages/ai/src/providers/openai.models.ts",
+      "type": "file",
+      "name": "openai.models.ts",
+      "filePath": "packages/ai/src/providers/openai.models.ts",
+      "summary": "OpenAI provider 的静态模型目录,导出只读常量 OPENAI_MODELS,目前包含单个 gpt-5.4-mini 条目,所有条目以 satisfies Model<\"openai-responses\"> 进行类型约束。",
+      "tags": ["provider", "model-catalog", "constant", "typescript", "configuration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/src/providers/openai.ts",
+      "type": "file",
+      "name": "openai.ts",
+      "filePath": "packages/ai/src/providers/openai.ts",
+      "summary": "OpenAI provider 入口,导出工厂函数 openaiProvider():它把环境变量鉴权、模型列表与 openai-responses transport 装配成一个统一的 Provider<\"openai-responses\">,供全局 provider 列表注册使用。",
+      "tags": ["provider", "factory", "entry-point", "registration", "openai"],
+      "complexity": "simple",
+      "languageNotes": "通过 satisfies-style 类型友好的 createProvider 模式组装 provider,使用 envApiKeyAuth 实现统一鉴权抽象。"
+    },
+    {
+      "id": "file:packages/ai/test/test_openai_provider.ts",
+      "type": "file",
+      "name": "test_openai_provider.ts",
+      "filePath": "packages/ai/test/test_openai_provider.ts",
+      "summary": "针对 openaiProvider 的轻量级 smoke test:实例化 provider 后打印 id、name、baseUrl 与首个模型 id,不做断言,只用于本地快速验证 provider 装配成功。",
+      "tags": ["test", "smoke-test", "provider", "openai"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/test/test_openai_provider_stream.ts",
+      "type": "file",
+      "name": "test_openai_provider_stream.ts",
+      "filePath": "packages/ai/test/test_openai_provider_stream.ts",
+      "summary": "针对 openaiProvider 的端到端 streaming 验证脚本:读取 .env 中的 API key 与可选 baseUrl,发起一次 OpenAI Responses API 的 streamSimple 调用并把首条回复的文本连接后打印,失败时 exit 1。",
+      "tags": ["test", "e2e", "streaming", "sse", "openai", "dotenv"],
+      "complexity": "moderate",
+      "languageNotes": "使用 dotenv 的 override 模式,允许环境变量被 .env 强制覆盖,适合本地调试。"
+    },
+    {
+      "id": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+      "type": "function",
+      "name": "openaiProvider",
+      "filePath": "packages/ai/src/providers/openai.ts",
+      "lineRange": [6, 17],
+      "summary": "OpenAI provider 工厂函数:返回 createProvider({...}) 生成的 Provider<\"openai-responses\">,绑定环境变量鉴权、模型枚举与 openAIResponsesApi transport。",
+      "tags": ["factory", "provider", "registration", "openai"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/test/test_openai_provider_stream.ts:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "packages/ai/test/test_openai_provider_stream.ts",
+      "lineRange": [6, 35],
+      "summary": "异步 e2e 入口:实例化 openaiProvider、读取默认模型、构造请求模型、发起 streamSimple 并把首条 assistant 消息的文本 part 拼接后打印;任意阶段报错都会被外层 main().catch 捕获后退出码 1。",
+      "tags": ["test", "e2e", "streaming", "async", "openai"],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:packages/ai/src/providers/openai.models.ts",
+      "target": "file:packages/ai/src/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/providers/openai.ts",
+      "target": "file:packages/ai/src/api/openai-responses.lazy.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/providers/openai.ts",
+      "target": "file:packages/ai/src/auth/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/providers/openai.ts",
+      "target": "file:packages/ai/src/models.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/providers/openai.ts",
+      "target": "file:packages/ai/src/providers/openai.models.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/test/test_openai_provider.ts",
+      "target": "file:packages/ai/src/providers/openai.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/test/test_openai_provider_stream.ts",
+      "target": "file:packages/ai/src/providers/openai.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/providers/openai.ts",
+      "target": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/test/test_openai_provider_stream.ts",
+      "target": "function:packages/ai/test/test_openai_provider_stream.ts:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/providers/openai.ts",
+      "target": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+      "target": "file:packages/ai/src/models.ts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+      "target": "file:packages/ai/src/auth/helpers.ts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+      "target": "file:packages/ai/src/api/openai-responses.lazy.ts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/test/test_openai_provider_stream.ts:main",
+      "target": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/ai/test/test_openai_provider.ts",
+      "target": "file:packages/ai/src/providers/openai.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:packages/ai/test/test_openai_provider_stream.ts",
+      "target": "file:packages/ai/src/providers/openai.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

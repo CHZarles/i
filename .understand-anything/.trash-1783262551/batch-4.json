@@ -1,0 +1,125 @@
+{
+  "batchFiles": [
+    {"path": "packages/ai/src/providers/minimax.models.ts", "language": "typescript", "sizeLines": 15, "fileCategory": "code"},
+    {"path": "packages/ai/src/providers/minimax.ts", "language": "typescript", "sizeLines": 15, "fileCategory": "code"},
+    {"path": "packages/ai/test/test_minimax_provider.ts", "language": "typescript", "sizeLines": 20, "fileCategory": "code"}
+  ],
+  "nodes": [
+    {
+      "id": "file:packages/ai/src/providers/minimax.models.ts",
+      "type": "file",
+      "name": "minimax.models.ts",
+      "filePath": "packages/ai/src/providers/minimax.models.ts",
+      "summary": "声明 MiniMax provider 支持的模型静态表(MINIMAX_MODELS),使用 satisfies 约束 API 类型为 anthropic-messages,提供 1M 上下文窗口与 128K 最大输出。",
+      "tags": ["provider", "model-registry", "static-data", "configuration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/src/providers/minimax.ts",
+      "type": "file",
+      "name": "minimax.ts",
+      "filePath": "packages/ai/src/providers/minimax.ts",
+      "summary": "MiniMax provider 的注册入口,导出 minimaxProvider 工厂函数,通过 createProvider 装配 id/baseUrl/auth/模型列表,绑定 MINIMAX_API_KEY 环境变量鉴权。",
+      "tags": ["provider", "factory", "registration", "anthropic-messages"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/test/test_minimax_provider.ts",
+      "type": "file",
+      "name": "test_minimax_provider.ts",
+      "filePath": "packages/ai/test/test_minimax_provider.ts",
+      "summary": "对 minimaxProvider 的烟雾测试脚本,实例化 provider 后打印 id/name/baseUrl、首个模型元数据,并通过 envApiKeyAuth.resolve 解析鉴权来源。",
+      "tags": ["test", "smoke-test", "provider", "runtime-check"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/src/providers/minimax.ts:minimaxProvider",
+      "type": "function",
+      "name": "minimaxProvider",
+      "filePath": "packages/ai/src/providers/minimax.ts",
+      "lineRange": [5, 15],
+      "summary": "返回配置好的 Provider<\"anthropic-messages\">:固定 baseUrl 指向 api.minimax.io/anthropic,通过 envApiKeyAuth 读取 MINIMAX_API_KEY,并展开 MINIMAX_MODELS 作为可用模型列表。",
+      "tags": ["factory", "provider", "registration", "anthropic-messages"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:packages/ai/src/providers/minimax.models.ts",
+      "target": "file:packages/ai/src/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/providers/minimax.ts",
+      "target": "file:packages/ai/src/auth/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/providers/minimax.ts",
+      "target": "file:packages/ai/src/models.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/providers/minimax.ts",
+      "target": "file:packages/ai/src/providers/minimax.models.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/test/test_minimax_provider.ts",
+      "target": "file:packages/ai/src/providers/minimax.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/providers/minimax.models.ts",
+      "target": "function:packages/ai/src/providers/minimax.ts:minimaxProvider",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/providers/minimax.models.ts",
+      "target": "function:packages/ai/src/providers/minimax.ts:minimaxProvider",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/providers/minimax.ts:minimaxProvider",
+      "target": "function:packages/ai/src/models.ts:createProvider",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/providers/minimax.ts:minimaxProvider",
+      "target": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/providers/minimax.ts:minimaxProvider",
+      "target": "file:packages/ai/test/test_minimax_provider.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:packages/ai/src/providers/minimax.ts",
+      "target": "file:packages/ai/test/test_minimax_provider.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

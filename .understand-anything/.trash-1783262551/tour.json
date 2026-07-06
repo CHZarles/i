@@ -1,0 +1,70 @@
+[
+  {
+    "order": 1,
+    "title": "项目总览与工程规范",
+    "description": "先读 `draft.md` 建立全局心智模型:这是 spec-driven、Top-Down、Interface-first 的轻量基建方案,规定了最小技术栈(Vitest/ESLint/Prettier/TypeScript strict/GitHub Actions)、目录治理(packages/docs/specs/adr)以及 AI agent 只读 review 等协作约束。后续每一步都应回到这份规范核对“为什么这样写”。",
+    "nodeIds": ["document:draft.md"]
+  },
+  {
+    "order": 2,
+    "title": "工作区根 manifest 与运行时配置",
+    "description": "`package.json` 把仓库声明为纯 ESM workspace,仅以 `dotenv` 为运行时依赖,体现 KISS/YAGNI;`.env` 集中放置 OpenAI 与 MiniMax 的 API key、baseUrl 与 Node 代理,正是后续 `envApiKeyAuth` 工厂读取的来源。把根配置放在一起看,可以快速理解包外没有任何构建脚手架。",
+    "nodeIds": ["config:package.json", "config:.env"]
+  },
+  {
+    "order": 3,
+    "title": "类型契约底层:provider 公共类型与 SSE 流",
+    "description": "`src/types.ts` 定义 `Model`、`Message`、`Usage`、`Context`、`AssistantMessageEventStream` 等所有 provider 共享的契约;`utils/event-stream.ts` 在此之上实现通用 `EventStream<T>` 异步队列,并特化出 `AssistantMessageEventStream`。这一层是 BFS 的最深处,所有 transport 与 provider 都依赖它,先把“流是什么”钉死才能往上盖协议。",
+    "nodeIds": ["file:packages/ai/src/types.ts", "file:packages/ai/src/utils/event-stream.ts"],
+    "languageLesson": "`EventStream<T>` 是基于 Promise 队列手写的 AsyncIterable,既支持 `for await` 又能 `push/close`,比直接套第三方流库更轻,符合 KISS。"
+  },
+  {
+    "order": 4,
+    "title": "鉴权抽象与 env 工厂",
+    "description": "`auth/types.ts` 给出统一契约:`ModelAuth` 描述单次请求的鉴权字段,`ApiKeyAuth` + `ProviderAuth` 描述 provider 级别的持久化与解析流程,`AuthContext` 用 `env(name)` 抽象进程外配置访问。`auth/helpers.ts` 的 `envApiKeyAuth` 工厂封装“stored credential → env 回退”的标准解析,后续两个 provider 直接复用,避免重复造轮子。",
+    "nodeIds": ["file:packages/ai/src/auth/types.ts", "file:packages/ai/src/auth/helpers.ts"]
+  },
+  {
+    "order": 5,
+    "title": "Provider 注册中心:createProvider 装配",
+    "description": "`src/models.ts` 定义 `Provider` 与 `CreateProviderOptions` 接口,提供 `createProvider` 工厂把模型列表 + auth + stream 三段拼成一个 provider 实例。这一步是 BFS 的入口点,也是整套架构的“总装车间”——理解它就理解了为什么 OpenAI 与 MiniMax 都能用同一个 `createProvider` 装配出来。",
+    "nodeIds": ["file:packages/ai/src/models.ts"],
+    "languageLesson": "`createProvider` 的实现常用 `satisfies Provider` 约束返回类型,既保留字面量推导又强制契约,非常适合工厂装配模式。"
+  },
+  {
+    "order": 6,
+    "title": "OpenAI provider:Responses API 流式实现",
+    "description": "`providers/openai.ts` 调 `createProvider` 装配 OpenAI;`providers/openai.models.ts` 用 `satisfies` 暴露 `OPENAI_MODELS` 静态目录;`api/openai-responses.ts` 把 `Context` 转为 prompt、调 `/responses` 端点、产出 `AssistantMessageEventStream`;`api/openai-responses.lazy.ts` 把命名空间导出惰性包装成 `ProviderStreams`。这一步展示“一个 provider + 一个 transport + 一个模型表”的最小三角。",
+    "nodeIds": [
+      "file:packages/ai/src/providers/openai.ts",
+      "file:packages/ai/src/providers/openai.models.ts",
+      "file:packages/ai/src/api/openai-responses.ts",
+      "file:packages/ai/src/api/openai-responses.lazy.ts"
+    ],
+    "languageLesson": "`.lazy.ts` 通过 getter/proxy 把 `import` 延迟到首次调用,降低包启动成本,适合大 SDK 按需加载子模块。"
+  },
+  {
+    "order": 7,
+    "title": "MiniMax provider 与 Anthropic Messages 复用",
+    "description": "`providers/minimax.ts` 同样走 `createProvider`,但底层 transport 复用 `api/anthropic-messages.ts`(Anthropic Messages API 兼容);`providers/minimax.models.ts` 用 `satisfies anthropic-messages` 类型锚定 API 契约。这一步揭示了“同一个 provider 装配接口、不同 transport”的复用方式,新增 MiniMax-M 系列只需再添一行模型表。",
+    "nodeIds": [
+      "file:packages/ai/src/providers/minimax.ts",
+      "file:packages/ai/src/providers/minimax.models.ts",
+      "file:packages/ai/src/api/anthropic-messages.ts"
+    ]
+  },
+  {
+    "order": 8,
+    "title": "测试与回归:smoke + e2e 双层校验",
+    "description": "`test_*.ts` 系列既覆盖纯装配路径(`test_auth.ts`、`test_models.ts`、`test_openai_provider.ts` smoke 验证工厂与目录),也覆盖真实端到端(`test_openai_provider_stream.ts` 触发流式响应,`test_minimax_provider.ts` 走 MiniMax,`test_minimax_raw_provider.ts` 直接调 raw Anthropic transport)。失败一律 exit 1,可直接挂 CI,符合 draft 中“测试覆盖核心逻辑,不追求假覆盖”的规范。",
+    "nodeIds": [
+      "file:packages/ai/test/test_auth.ts",
+      "file:packages/ai/test/test_models.ts",
+      "file:packages/ai/test/test_openai_provider.ts",
+      "file:packages/ai/test/test_openai_provider_stream.ts",
+      "file:packages/ai/test/test_minimax_provider.ts",
+      "file:packages/ai/test/test_minimax_raw_provider.ts"
+    ],
+    "languageLesson": "TypeScript 测试脚本直接用 `tsx`/`node --import` 运行,既无需 Jest 也能覆盖 import 链,体现了“最小测试栈 = Vitest 或 Jest”的规范选择空间。"
+  }
+]

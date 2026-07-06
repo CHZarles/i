@@ -1,0 +1,701 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "24516d4e70f17c9713e6875a738340591d4b3c0b",
+  "generatedAt": "2026-07-05T14:42:16.929Z",
+  "files": {
+    ".codeiumignore": {
+      "filePath": ".codeiumignore",
+      "contentHash": "48e21bbd1baba96422172bebe2dae74b081629733d4696435cba8cb4725ecd5d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": false
+    },
+    ".continue/rules/answer-only.md": {
+      "filePath": ".continue/rules/answer-only.md",
+      "contentHash": "5361dc3e659aa7243bff00afeb11b107c8eba936bcdc03b9e25c5e90f691a48d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 14,
+      "hasStructuralAnalysis": true
+    },
+    ".cursorignore": {
+      "filePath": ".cursorignore",
+      "contentHash": "0afafba0ad4fe21315d5f47fca87fdac2aadde91a765c4b892dd30d410ffc6e0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 7,
+      "hasStructuralAnalysis": false
+    },
+    ".env": {
+      "filePath": ".env",
+      "contentHash": "3001a84b6f13c53711dbcd35eb3529e84deabec833e9f12c159b174220ba866e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": true
+    },
+    ".github/copilot-instructions.md": {
+      "filePath": ".github/copilot-instructions.md",
+      "contentHash": "593087d7f2452d9c9eff825546baaa03bcfb975ac3bfdd3b49741ecdea270e45",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 10,
+      "hasStructuralAnalysis": true
+    },
+    ".understand-anything/.understandignore": {
+      "filePath": ".understand-anything/.understandignore",
+      "contentHash": "b13d10e7387e16e035ef42c5aa3fa84494d01f108bf1a0c416d45ecafa79a586",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 22,
+      "hasStructuralAnalysis": false
+    },
+    ".understand-anything/config.json": {
+      "filePath": ".understand-anything/config.json",
+      "contentHash": "aabfa32117b5409cb3ea8081cf52a883336fa9665f66eab4622910ca26ea83a7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 5,
+      "hasStructuralAnalysis": true
+    },
+    ".understand-anything/tmp/gen-ignore.cjs": {
+      "filePath": ".understand-anything/tmp/gen-ignore.cjs",
+      "contentHash": "e3599c3eda6987002a803b50da0ae5a0aa146c8c4ce5344cd30845b610c2ed56",
+      "functions": [
+        {
+          "name": "norm",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 22,
+      "hasStructuralAnalysis": true
+    },
+    ".windsurfrules": {
+      "filePath": ".windsurfrules",
+      "contentHash": "7c20568ba1e94de267fc34cc2f1986d20a821415c05730faaa05eb86ab368e01",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 10,
+      "hasStructuralAnalysis": false
+    },
+    "draft.md": {
+      "filePath": "draft.md",
+      "contentHash": "735ccf894f84db4743b904f11ec0d558a6d730dc4e6dfadba9de9b2dc5a9a88b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 423,
+      "hasStructuralAnalysis": true
+    },
+    "GEMINI.md": {
+      "filePath": "GEMINI.md",
+      "contentHash": "3eb4832508f34a62faf844d43afb7393567888f938674c40772f9c37ecf01524",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 10,
+      "hasStructuralAnalysis": true
+    },
+    "package.json": {
+      "filePath": "package.json",
+      "contentHash": "fc62ebaeb95d41989c55f5f5a911717548ced26ef34f0d222e968665914fe8e9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 10,
+      "hasStructuralAnalysis": true
+    },
+    "packages/ai/src/api/anthropic-messages.ts": {
+      "filePath": "packages/ai/src/api/anthropic-messages.ts",
+      "contentHash": "30665d804b16e994711da128ef1b8e86c642cf123b1552602ca95656b7913883",
+      "functions": [
+        {
+          "name": "callAnthropicMessages",
+          "params": [
+            "config",
+            "prompt"
+          ],
+          "exported": true,
+          "lineCount": 40
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "callAnthropicMessages"
+      ],
+      "totalLines": 48,
+      "hasStructuralAnalysis": true
+    },
+    "packages/ai/src/api/openai-responses.lazy.ts": {
+      "filePath": "packages/ai/src/api/openai-responses.lazy.ts",
+      "contentHash": "cbc6a6c30100d1c0474fd2ac23670a197335fb26e5176ac9dda600753b411d96",
+      "functions": [
+        {
+          "name": "openAIResponsesApi",
+          "params": [],
+          "returnType": "ProviderStreams",
+          "exported": true,
+          "lineCount": 1
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../types.ts",
+          "specifiers": [
+            "ProviderStreams"
+          ]
+        },
+        {
+          "source": "./openai-responses.ts",
+          "specifiers": [
+            "* as openAIResponses"
+          ]
+        }
+      ],
+      "exports": [
+        "openAIResponsesApi"
+      ],
+      "totalLines": 5,
+      "hasStructuralAnalysis": true
+    },
+    "packages/ai/src/api/openai-responses.ts": {
+      "filePath": "packages/ai/src/api/openai-responses.ts",
+      "contentHash": "1e42d141aeec3a1a470abb288f1f12c61861aba4ad2240d7b79e008cefa81207",
+      "functions": [
+        {
+          "name": "promptFromContext",
+          "params": [
+            "context"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "usageFromResponse",
+          "params": [
+            "data"
+          ],
+          "returnType": "Usage",
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "outputText",
+          "params": [
+            "data"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "createMessage",
+          "params": [
+            "model",
+            "text",
+            "data"
+          ],
+          "returnType": "AssistantMessage",
+          "exported": false,
+          "lineCount": 17
+        },
+        {
+          "name": "createErrorMessage",
+          "params": [
+            "model",
+            "error"
+          ],
+          "returnType": "AssistantMessage",
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "streamSimple",
+          "params": [
+            "model",
+            "context",
+            "options"
+          ],
+          "returnType": "AssistantMessageEventStream",
+          "exported": true,
+          "lineCount": 44
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../types.ts",
+          "specifiers": [
+            "AssistantMessage",
+            "Context",
+            "Model",
+            "SimpleStreamOptions",
+            "StreamFunction",
+            "StreamOptions",
+            "Usage"
+          ]
+        },
+        {
+          "source": "../utils/event-stream.ts",
+          "specifiers": [
+            "AssistantMessageEventStream"
+          ]
+        }
+      ],
+      "exports": [
+        "streamSimple",
+        "stream"
+      ],
+      "totalLines": 135,
+      "hasStructuralAnalysis": true
+    },
+    "packages/ai/src/auth/helpers.ts": {
+      "filePath": "packages/ai/src/auth/helpers.ts",
+      "contentHash": "4a20549054b479b3d190e2db17df7d156742a6ea8bcbe83063617cf54ae6eea4",
+      "functions": [
+        {
+          "name": "envApiKeyAuth",
+          "params": [
+            "name",
+            "envVars"
+          ],
+          "returnType": "ApiKeyAuth",
+          "exported": true,
+          "lineCount": 27
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "./types.ts",
+          "specifiers": [
+            "ApiKeyAuth"
+          ]
+        }
+      ],
+      "exports": [
+        "envApiKeyAuth"
+      ],
+      "totalLines": 36,
+      "hasStructuralAnalysis": true
+    },
+    "packages/ai/src/auth/types.ts": {
+      "filePath": "packages/ai/src/auth/types.ts",
+      "contentHash": "870e28246f11fbf0547c92ae9caa3eb6f12556016d80f9763a52b640d2e35419",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../types.ts",
+          "specifiers": [
+            "Api",
+            "Model",
+            "ProviderEnv",
+            "ProviderHeaders"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 84,
+      "hasStructuralAnalysis": true
+    },
+    "packages/ai/src/models.ts": {
+      "filePath": "packages/ai/src/models.ts",
+      "contentHash": "9ac8dbd3812f016d4d0e81045d96168fd5be389398ad409e01f56fc8466cfc2f",
+      "functions": [
+        {
+          "name": "createProvider",
+          "params": [
+            "input"
+          ],
+          "returnType": "Provider<TApi>",
+          "exported": true,
+          "lineCount": 16
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "./auth/types.ts",
+          "specifiers": [
+            "ProviderAuth"
+          ]
+        },
+        {
+          "source": "./types.ts",
+          "specifiers": [
+            "Api",
+            "ApiStreamOptions",
+            "AssistantMessageEventStream",
+            "Context",
+            "Model",
+            "ProviderHeaders",
+            "ProviderStreams",
+            "SimpleStreamOptions"
+          ]
+        }
+      ],
+      "exports": [
+        "createProvider"
+      ],
+      "totalLines": 71,
+      "hasStructuralAnalysis": true
+    },
+    "packages/ai/src/providers/minimax.models.ts": {
+      "filePath": "packages/ai/src/providers/minimax.models.ts",
+      "contentHash": "d2c01bf365626efee2b6547b72dd5d868ddcad5630abd6df4e920c99a75945e2",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../types.ts",
+          "specifiers": [
+            "Model"
+          ]
+        }
+      ],
+      "exports": [
+        "MINIMAX_MODELS"
+      ],
+      "totalLines": 16,
+      "hasStructuralAnalysis": true
+    },
+    "packages/ai/src/providers/minimax.ts": {
+      "filePath": "packages/ai/src/providers/minimax.ts",
+      "contentHash": "fa0395e1656c11bbbd5dd8f50019624cf57b7d69379a935dc77a5a349238690c",
+      "functions": [
+        {
+          "name": "minimaxProvider",
+          "params": [],
+          "returnType": "Provider<\"anthropic-messages\">",
+          "exported": true,
+          "lineCount": 11
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../auth/helpers.ts",
+          "specifiers": [
+            "envApiKeyAuth"
+          ]
+        },
+        {
+          "source": "../models.ts",
+          "specifiers": [
+            "createProvider",
+            "Provider"
+          ]
+        },
+        {
+          "source": "./minimax.models.ts",
+          "specifiers": [
+            "MINIMAX_MODELS"
+          ]
+        }
+      ],
+      "exports": [
+        "minimaxProvider"
+      ],
+      "totalLines": 16,
+      "hasStructuralAnalysis": true
+    },
+    "packages/ai/src/providers/openai.models.ts": {
+      "filePath": "packages/ai/src/providers/openai.models.ts",
+      "contentHash": "1efc26c3dcdce005f393f9007fc3a19ba0bdf39046160629803426c595f5f888",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../types.ts",
+          "specifiers": [
+            "Model"
+          ]
+        }
+      ],
+      "exports": [
+        "OPENAI_MODELS"
+      ],
+      "totalLines": 16,
+      "hasStructuralAnalysis": true
+    },
+    "packages/ai/src/providers/openai.ts": {
+      "filePath": "packages/ai/src/providers/openai.ts",
+      "contentHash": "01d79dae6bc71706b73d89c219aca1381882231d8cde569296eb5a4009ad9e66",
+      "functions": [
+        {
+          "name": "openaiProvider",
+          "params": [],
+          "returnType": "Provider<\"openai-responses\">",
+          "exported": true,
+          "lineCount": 12
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../api/openai-responses.lazy.ts",
+          "specifiers": [
+            "openAIResponsesApi"
+          ]
+        },
+        {
+          "source": "../auth/helpers.ts",
+          "specifiers": [
+            "envApiKeyAuth"
+          ]
+        },
+        {
+          "source": "../models.ts",
+          "specifiers": [
+            "createProvider",
+            "Provider"
+          ]
+        },
+        {
+          "source": "./openai.models.ts",
+          "specifiers": [
+            "OPENAI_MODELS"
+          ]
+        }
+      ],
+      "exports": [
+        "openaiProvider"
+      ],
+      "totalLines": 18,
+      "hasStructuralAnalysis": true
+    },
+    "packages/ai/src/types.ts": {
+      "filePath": "packages/ai/src/types.ts",
+      "contentHash": "3819711192613efdfb3b1ebc424529e9cce8dfcf41786732e8964e080f5e4104",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "./utils/event-stream.ts",
+          "specifiers": [
+            "AssistantMessageEventStream"
+          ]
+        }
+      ],
+      "exports": [
+        "AssistantMessageEventStream"
+      ],
+      "totalLines": 107,
+      "hasStructuralAnalysis": true
+    },
+    "packages/ai/src/utils/event-stream.ts": {
+      "filePath": "packages/ai/src/utils/event-stream.ts",
+      "contentHash": "72edab7a803b6517bc8581ec1573e07e4ecae77df8235a6bab3b37cc12b5fe3a",
+      "functions": [],
+      "classes": [
+        {
+          "name": "EventStream",
+          "methods": [
+            "constructor",
+            "push",
+            "end",
+            "result"
+          ],
+          "properties": [
+            "queue",
+            "waiting",
+            "done",
+            "finalResultPromise",
+            "resolveFinalResult",
+            "isComplete",
+            "extractResult"
+          ],
+          "exported": true,
+          "lineCount": 65
+        },
+        {
+          "name": "AssistantMessageEventStream",
+          "methods": [
+            "constructor"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 15
+        }
+      ],
+      "imports": [
+        {
+          "source": "../types.ts",
+          "specifiers": [
+            "AssistantMessage",
+            "AssistantMessageEvent"
+          ]
+        }
+      ],
+      "exports": [
+        "EventStream",
+        "AssistantMessageEventStream"
+      ],
+      "totalLines": 84,
+      "hasStructuralAnalysis": true
+    },
+    "packages/ai/test/test_auth.ts": {
+      "filePath": "packages/ai/test/test_auth.ts",
+      "contentHash": "843633b25fc3d93fa6f838eba21516dfc56f763ddf7ccef7089f65623494831a",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../src/auth/helpers.ts",
+          "specifiers": [
+            "envApiKeyAuth"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": true
+    },
+    "packages/ai/test/test_minimax_provider.ts": {
+      "filePath": "packages/ai/test/test_minimax_provider.ts",
+      "contentHash": "bb2d188949dc25778d51f36d603415dd8f4a8c56d57afb8de08ad56c5299d779",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../src/providers/minimax.ts",
+          "specifiers": [
+            "minimaxProvider"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 21,
+      "hasStructuralAnalysis": true
+    },
+    "packages/ai/test/test_minimax_raw_provider.ts": {
+      "filePath": "packages/ai/test/test_minimax_raw_provider.ts",
+      "contentHash": "e161bbbc24dc8d5241921568e0f8406f6bd7c767cac05846f487a4b1007a65d6",
+      "functions": [
+        {
+          "name": "main",
+          "params": [],
+          "exported": false,
+          "lineCount": 13
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "dotenv",
+          "specifiers": [
+            "config"
+          ]
+        },
+        {
+          "source": "../src/api/anthropic-messages.ts",
+          "specifiers": [
+            "callAnthropicMessages"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 24,
+      "hasStructuralAnalysis": true
+    },
+    "packages/ai/test/test_models.ts": {
+      "filePath": "packages/ai/test/test_models.ts",
+      "contentHash": "e12ea003f8afbe28b41dfbaac413bece14ff6eaf6999a9c8c5026b9702362665",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../src/auth/helpers.ts",
+          "specifiers": [
+            "envApiKeyAuth"
+          ]
+        },
+        {
+          "source": "../src/models.ts",
+          "specifiers": [
+            "createProvider"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 28,
+      "hasStructuralAnalysis": true
+    },
+    "packages/ai/test/test_openai_provider_stream.ts": {
+      "filePath": "packages/ai/test/test_openai_provider_stream.ts",
+      "contentHash": "867c4c1a745e2fd8377e667cdafd1646c88208e1d6e002cda8bd44dc7066d644",
+      "functions": [
+        {
+          "name": "main",
+          "params": [],
+          "exported": false,
+          "lineCount": 30
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "dotenv",
+          "specifiers": [
+            "config"
+          ]
+        },
+        {
+          "source": "../src/providers/openai.ts",
+          "specifiers": [
+            "openaiProvider"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 41,
+      "hasStructuralAnalysis": true
+    },
+    "packages/ai/test/test_openai_provider.ts": {
+      "filePath": "packages/ai/test/test_openai_provider.ts",
+      "contentHash": "9ccb03da05da88a11e9140fcb468bd60510d23ea1cd205f61239d9a830b431f0",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../src/providers/openai.ts",
+          "specifiers": [
+            "openaiProvider"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 9,
+      "hasStructuralAnalysis": true
+    }
+  }
+}

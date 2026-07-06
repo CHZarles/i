@@ -1,0 +1,321 @@
+{
+  "nodes": [
+    {
+      "id": "file:packages/ai/src/api/openai-responses.lazy.ts",
+      "type": "file",
+      "name": "openai-responses.lazy.ts",
+      "filePath": "packages/ai/src/api/openai-responses.lazy.ts",
+      "summary": "openai-responses 模块的惰性包装层,把 openai-responses 命名空间导出转为符合 ProviderStreams 形状的对象，供 provider 注册中心在按需加载时引用。",
+      "tags": ["entry-point", "api-handler", "lazy-load", "provider", "wrapper"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/src/api/openai-responses.lazy.ts:openAIResponsesApi",
+      "type": "function",
+      "name": "openAIResponsesApi",
+      "filePath": "packages/ai/src/api/openai-responses.lazy.ts",
+      "lineRange": [4, 4],
+      "summary": "返回符合 ProviderStreams 接口的对象，把 openai-responses 模块的 stream/streamSimple 流函数统一暴露给上层 provider。",
+      "tags": ["factory", "provider", "api-handler"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/src/api/openai-responses.ts",
+      "type": "file",
+      "name": "openai-responses.ts",
+      "filePath": "packages/ai/src/api/openai-responses.ts",
+      "summary": "OpenAI Responses API 的流式适配实现：把消息上下文转换为 prompt、调用 /responses 端点、解析输出文本与 usage，并产出 AssistantMessageEventStream。",
+      "tags": ["api-handler", "stream", "openai", "provider", "transport"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:packages/ai/src/api/openai-responses.ts:promptFromContext",
+      "type": "function",
+      "name": "promptFromContext",
+      "filePath": "packages/ai/src/api/openai-responses.ts",
+      "lineRange": [30, 35],
+      "summary": "从 Context 中反向查找最近一条 user 消息并返回其内容字符串，作为单轮 prompt 文本。",
+      "tags": ["utility", "context", "prompt"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/src/api/openai-responses.ts:usageFromResponse",
+      "type": "function",
+      "name": "usageFromResponse",
+      "filePath": "packages/ai/src/api/openai-responses.ts",
+      "lineRange": [37, 48],
+      "summary": "把 OpenAI Responses 响应里的 usage 字段映射为统一的 Usage 结构（含成本占位字段），缺失值用 0 兜底。",
+      "tags": ["utility", "usage", "normalization"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/src/api/openai-responses.ts:outputText",
+      "type": "function",
+      "name": "outputText",
+      "filePath": "packages/ai/src/api/openai-responses.ts",
+      "lineRange": [50, 57],
+      "summary": "从响应体中提取最终文本：优先 output_text，否则从 output[].content[] 中筛 output_text 片段拼接。",
+      "tags": ["utility", "parser", "text"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/src/api/openai-responses.ts:createMessage",
+      "type": "function",
+      "name": "createMessage",
+      "filePath": "packages/ai/src/api/openai-responses.ts",
+      "lineRange": [59, 75],
+      "summary": "构造统一的 AssistantMessage 对象，包含 role、content、api/provider/model 元数据、usage 与 timestamp。",
+      "tags": ["factory", "data-model", "message"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/src/api/openai-responses.ts:createErrorMessage",
+      "type": "function",
+      "name": "createErrorMessage",
+      "filePath": "packages/ai/src/api/openai-responses.ts",
+      "lineRange": [77, 86],
+      "summary": "在调用失败时构造 stopReason 为 error 的 AssistantMessage，并把 Error.message 或 String(error) 写入 errorMessage。",
+      "tags": ["factory", "error-handling", "message"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/src/api/openai-responses.ts:streamSimple",
+      "type": "function",
+      "name": "streamSimple",
+      "filePath": "packages/ai/src/api/openai-responses.ts",
+      "lineRange": [88, 131],
+      "summary": "StreamFunction 主入口：异步调用 OpenAI /responses 端点，按 start→done/error 顺序向 AssistantMessageEventStream 推送事件，并把最终消息经 stream.end 关闭。",
+      "tags": ["api-handler", "stream", "transport", "fetch"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:packages/ai/src/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "packages/ai/src/types.ts",
+      "summary": "ai 包的核心类型中枢：定义 provider 公共类型 Model、Message、Usage、Context、AssistantMessageEventStream、ProviderStreams、StreamFunction 等，所有 provider 模块共享此契约。",
+      "tags": ["type-definition", "core", "provider", "data-model"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:packages/ai/src/utils/event-stream.ts",
+      "type": "file",
+      "name": "event-stream.ts",
+      "filePath": "packages/ai/src/utils/event-stream.ts",
+      "summary": "通用 SSE 事件流解析器：实现 EventStream 泛型 AsyncIterable 队列，并特化出 AssistantMessageEventStream，供各 provider 流函数推送 start/done/error 事件并由消费端异步迭代。",
+      "tags": ["utility", "stream", "async-iter", "event-stream", "queue"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:packages/ai/src/utils/event-stream.ts:EventStream",
+      "type": "class",
+      "name": "EventStream",
+      "filePath": "packages/ai/src/utils/event-stream.ts",
+      "lineRange": [3, 67],
+      "summary": "泛型事件流容器：维护事件队列与等待者列表，支持 push/end/异步迭代，并暴露 finalResultPromise 给消费者在流结束后取最终结果。",
+      "tags": ["stream", "async-iter", "event-stream", "generic"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:packages/ai/src/utils/event-stream.ts:AssistantMessageEventStream",
+      "type": "class",
+      "name": "AssistantMessageEventStream",
+      "filePath": "packages/ai/src/utils/event-stream.ts",
+      "lineRange": [69, 83],
+      "summary": "EventStream 的 assistant message 特化版本：以 AssistantMessageEvent 为事件类型、AssistantMessage 为终值，done/error 事件触发终结。",
+      "tags": ["stream", "specialization", "event-stream", "domain-model"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:packages/ai/src/api/openai-responses.lazy.ts",
+      "target": "file:packages/ai/src/api/openai-responses.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.lazy.ts",
+      "target": "file:packages/ai/src/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.lazy.ts",
+      "target": "function:packages/ai/src/api/openai-responses.lazy.ts:openAIResponsesApi",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.lazy.ts",
+      "target": "function:packages/ai/src/api/openai-responses.lazy.ts:openAIResponsesApi",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "file:packages/ai/src/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "file:packages/ai/src/utils/event-stream.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "function:packages/ai/src/api/openai-responses.ts:promptFromContext",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "function:packages/ai/src/api/openai-responses.ts:usageFromResponse",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "function:packages/ai/src/api/openai-responses.ts:outputText",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "function:packages/ai/src/api/openai-responses.ts:createMessage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "function:packages/ai/src/api/openai-responses.ts:createErrorMessage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "function:packages/ai/src/api/openai-responses.ts:streamSimple",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "function:packages/ai/src/api/openai-responses.ts:streamSimple",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/api/openai-responses.ts:createMessage",
+      "target": "function:packages/ai/src/api/openai-responses.ts:usageFromResponse",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/api/openai-responses.ts:createErrorMessage",
+      "target": "function:packages/ai/src/api/openai-responses.ts:createMessage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/api/openai-responses.ts:streamSimple",
+      "target": "function:packages/ai/src/api/openai-responses.ts:createMessage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/api/openai-responses.ts:streamSimple",
+      "target": "function:packages/ai/src/api/openai-responses.ts:promptFromContext",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/api/openai-responses.ts:streamSimple",
+      "target": "function:packages/ai/src/api/openai-responses.ts:outputText",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/api/openai-responses.ts:streamSimple",
+      "target": "function:packages/ai/src/api/openai-responses.ts:createErrorMessage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/api/openai-responses.ts:streamSimple",
+      "target": "class:packages/ai/src/utils/event-stream.ts:AssistantMessageEventStream",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:packages/ai/src/types.ts",
+      "target": "file:packages/ai/src/utils/event-stream.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/utils/event-stream.ts",
+      "target": "file:packages/ai/src/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/utils/event-stream.ts",
+      "target": "class:packages/ai/src/utils/event-stream.ts:EventStream",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/utils/event-stream.ts",
+      "target": "class:packages/ai/src/utils/event-stream.ts:EventStream",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/ai/src/utils/event-stream.ts",
+      "target": "class:packages/ai/src/utils/event-stream.ts:AssistantMessageEventStream",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/utils/event-stream.ts",
+      "target": "class:packages/ai/src/utils/event-stream.ts:AssistantMessageEventStream",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:packages/ai/src/utils/event-stream.ts:AssistantMessageEventStream",
+      "target": "class:packages/ai/src/utils/event-stream.ts:EventStream",
+      "type": "inherits",
+      "direction": "forward",
+      "weight": 0.9
+    }
+  ]
+}

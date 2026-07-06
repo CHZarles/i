@@ -1,0 +1,274 @@
+{
+  "name": "i",
+  "description": "一个轻量的 TypeScript ESM monorepo,核心包 `packages/ai` 提供 AI provider 注册与转发能力,实现 OpenAI Responses API、Anthropic Messages API 与 MiniMax provider,支持模型列表查询、SSE 事件流解析与统一鉴权抽象。根 package.json 仅承载工作区根依赖(`dotenv`、`@types/node`),业务实现集中在 `packages/ai/src` 下。",
+  "languages": [
+    "json",
+    "markdown",
+    "typescript"
+  ],
+  "frameworks": [],
+  "files": [
+    {
+      "path": ".codeiumignore",
+      "language": "unknown",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".continue/rules/answer-only.md",
+      "language": "markdown",
+      "sizeLines": 13,
+      "fileCategory": "docs"
+    },
+    {
+      "path": ".cursorignore",
+      "language": "unknown",
+      "sizeLines": 6,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".env",
+      "language": "config",
+      "sizeLines": 5,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".github/copilot-instructions.md",
+      "language": "markdown",
+      "sizeLines": 9,
+      "fileCategory": "docs"
+    },
+    {
+      "path": ".understand-anything/.understandignore",
+      "language": "unknown",
+      "sizeLines": 21,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".understand-anything/config.json",
+      "language": "json",
+      "sizeLines": 4,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".understand-anything/tmp/gen-ignore.cjs",
+      "language": "javascript",
+      "sizeLines": 21,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".windsurfrules",
+      "language": "unknown",
+      "sizeLines": 9,
+      "fileCategory": "code"
+    },
+    {
+      "path": "draft.md",
+      "language": "markdown",
+      "sizeLines": 422,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GEMINI.md",
+      "language": "markdown",
+      "sizeLines": 9,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "package.json",
+      "language": "json",
+      "sizeLines": 9,
+      "fileCategory": "config"
+    },
+    {
+      "path": "packages/ai/src/api/anthropic-messages.ts",
+      "language": "typescript",
+      "sizeLines": 47,
+      "fileCategory": "code"
+    },
+    {
+      "path": "packages/ai/src/api/openai-responses.lazy.ts",
+      "language": "typescript",
+      "sizeLines": 4,
+      "fileCategory": "code"
+    },
+    {
+      "path": "packages/ai/src/api/openai-responses.ts",
+      "language": "typescript",
+      "sizeLines": 134,
+      "fileCategory": "code"
+    },
+    {
+      "path": "packages/ai/src/auth/helpers.ts",
+      "language": "typescript",
+      "sizeLines": 35,
+      "fileCategory": "code"
+    },
+    {
+      "path": "packages/ai/src/auth/types.ts",
+      "language": "typescript",
+      "sizeLines": 83,
+      "fileCategory": "code"
+    },
+    {
+      "path": "packages/ai/src/models.ts",
+      "language": "typescript",
+      "sizeLines": 70,
+      "fileCategory": "code"
+    },
+    {
+      "path": "packages/ai/src/providers/minimax.models.ts",
+      "language": "typescript",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "packages/ai/src/providers/minimax.ts",
+      "language": "typescript",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "packages/ai/src/providers/openai.models.ts",
+      "language": "typescript",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "packages/ai/src/providers/openai.ts",
+      "language": "typescript",
+      "sizeLines": 17,
+      "fileCategory": "code"
+    },
+    {
+      "path": "packages/ai/src/types.ts",
+      "language": "typescript",
+      "sizeLines": 106,
+      "fileCategory": "code"
+    },
+    {
+      "path": "packages/ai/src/utils/event-stream.ts",
+      "language": "typescript",
+      "sizeLines": 83,
+      "fileCategory": "code"
+    },
+    {
+      "path": "packages/ai/test/test_auth.ts",
+      "language": "typescript",
+      "sizeLines": 22,
+      "fileCategory": "code"
+    },
+    {
+      "path": "packages/ai/test/test_minimax_provider.ts",
+      "language": "typescript",
+      "sizeLines": 20,
+      "fileCategory": "code"
+    },
+    {
+      "path": "packages/ai/test/test_minimax_raw_provider.ts",
+      "language": "typescript",
+      "sizeLines": 23,
+      "fileCategory": "code"
+    },
+    {
+      "path": "packages/ai/test/test_models.ts",
+      "language": "typescript",
+      "sizeLines": 27,
+      "fileCategory": "code"
+    },
+    {
+      "path": "packages/ai/test/test_openai_provider_stream.ts",
+      "language": "typescript",
+      "sizeLines": 40,
+      "fileCategory": "code"
+    },
+    {
+      "path": "packages/ai/test/test_openai_provider.ts",
+      "language": "typescript",
+      "sizeLines": 8,
+      "fileCategory": "code"
+    }
+  ],
+  "totalFiles": 30,
+  "filteredByIgnore": 0,
+  "estimatedComplexity": "small",
+  "importMap": {
+    ".codeiumignore": [],
+    ".continue/rules/answer-only.md": [],
+    ".cursorignore": [],
+    ".env": [],
+    ".github/copilot-instructions.md": [],
+    ".understand-anything/.understandignore": [],
+    ".understand-anything/config.json": [],
+    ".understand-anything/tmp/gen-ignore.cjs": [],
+    ".windsurfrules": [],
+    "draft.md": [],
+    "GEMINI.md": [],
+    "package.json": [],
+    "packages/ai/src/api/anthropic-messages.ts": [],
+    "packages/ai/src/api/openai-responses.lazy.ts": [
+      "packages/ai/src/api/openai-responses.ts",
+      "packages/ai/src/types.ts"
+    ],
+    "packages/ai/src/api/openai-responses.ts": [
+      "packages/ai/src/types.ts",
+      "packages/ai/src/utils/event-stream.ts"
+    ],
+    "packages/ai/src/auth/helpers.ts": [
+      "packages/ai/src/auth/types.ts"
+    ],
+    "packages/ai/src/auth/types.ts": [
+      "packages/ai/src/types.ts"
+    ],
+    "packages/ai/src/models.ts": [
+      "packages/ai/src/auth/types.ts",
+      "packages/ai/src/types.ts"
+    ],
+    "packages/ai/src/providers/minimax.models.ts": [
+      "packages/ai/src/types.ts"
+    ],
+    "packages/ai/src/providers/minimax.ts": [
+      "packages/ai/src/auth/helpers.ts",
+      "packages/ai/src/models.ts",
+      "packages/ai/src/providers/minimax.models.ts"
+    ],
+    "packages/ai/src/providers/openai.models.ts": [
+      "packages/ai/src/types.ts"
+    ],
+    "packages/ai/src/providers/openai.ts": [
+      "packages/ai/src/api/openai-responses.lazy.ts",
+      "packages/ai/src/auth/helpers.ts",
+      "packages/ai/src/models.ts",
+      "packages/ai/src/providers/openai.models.ts"
+    ],
+    "packages/ai/src/types.ts": [
+      "packages/ai/src/utils/event-stream.ts"
+    ],
+    "packages/ai/src/utils/event-stream.ts": [
+      "packages/ai/src/types.ts"
+    ],
+    "packages/ai/test/test_auth.ts": [
+      "packages/ai/src/auth/helpers.ts"
+    ],
+    "packages/ai/test/test_minimax_provider.ts": [
+      "packages/ai/src/providers/minimax.ts"
+    ],
+    "packages/ai/test/test_minimax_raw_provider.ts": [
+      "packages/ai/src/api/anthropic-messages.ts"
+    ],
+    "packages/ai/test/test_models.ts": [
+      "packages/ai/src/auth/helpers.ts",
+      "packages/ai/src/models.ts"
+    ],
+    "packages/ai/test/test_openai_provider_stream.ts": [
+      "packages/ai/src/providers/openai.ts"
+    ],
+    "packages/ai/test/test_openai_provider.ts": [
+      "packages/ai/src/providers/openai.ts"
+    ]
+  },
+  "entryPoint": "packages/ai/src/types.ts",
+  "rawDescription": "一个 TypeScript ESM monorepo,以单一业务包 `packages/ai` 提供 AI provider 注册与转发能力,统一封装 OpenAI Responses、Anthropic Messages 与 MiniMax 三类后端,搭配 SSE 事件流解析与统一鉴权抽象。",
+  "readmeHead": "**轻量基建方案**\n\n\n**核心原则**\n\n- 先写需求，再写接口，再写测试，再写实现。\n- 所有变更必须过 CI。\n- 测试覆盖核心逻辑，不追求假覆盖。\n- 文档跟代码一起 review。\n- 设计模式只用于减少重复，不提前抽象未来。\n- AI agent 只读 review，不写代码、不改文件。\n\n**推荐最小栈**\n\n| 领域 | 建议 |\n|---|---|\n| 测试 | Vitest 或 Jest |\n| Coverage | V8 / Istanbul |\n| Lint | ESLint |\n| Format | Prettier |\n| 类型检查 | TypeScript strict |\n| CI | GitHub Actions |\n| 文档 | MkDocs + Material |\n| 设计记录 | Markdown specs + ADR |\n| Review | 人工 review + 只读 review agent |\n\n**目录治理**\n\n建议把仓库分成几类内容：\n\n| 区域 | 用途 |\n|---|---|\n| `packages/` | 代码包 |\n| `docs/` | MkDocs 文档 |\n| `specs/` | feature specs / requirements |\n| `adr/` | 架构决策记录 |\n| `tests/` 或包内测试 | 测试 |\n| `.github/` | CI / PR 模板 |\n| 根目录规则文件 | AI policy、贡献规范、README |\n\n不要为了“看起来专业”拆太多层。一个人项目，目录要少、清楚、能长期坚持。\n\n**开发流程**\n\n每个功能按这个顺序走：\n\n1. 写 feature spec  \n   说明用户目标、输入输出、边界、错误情况、非目标。\n\n2. 设计 interface  \n   先定义模块边界、公开接口、数据结构、错误模型。",
+  "analysisNotes": "项目核心为 `packages/ai` 单包,根 `package.json` 仅作工作区根依赖(`dotenv`、`@types/node`,`type: module`),无主流框架,transport / SSE 解析均为手写。根目录的 AI 客户端规则文件(`.codeiumignore`、`.cursorignore`、`.windsurfrules`、`.github/copilot-instructions.md`、`GEMINI.md`)已在物理上保留。`scan-project.mjs` 因 `.gitignore` 路径仍列出但文件已被物理删除,产生 5 条 stat ENOENT 告警(`.ai-answer-only-policy.md`、`.aiderignore`、`.cursor/rules/answer-only.mdc`、`AGENTS.md`、`CLAUDE.md`),这些路径在本仓库的 git status 中也确实已不存在。建议下游分析以 `packages/ai/src/types.ts` 作为公共类型入口、`packages/ai/src/utils/event-stream.ts` 为 SSE 解析入口、`packages/ai/src/providers/*` 为 provider 注册面。"
+}

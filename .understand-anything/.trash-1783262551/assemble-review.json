@@ -1,0 +1,249 @@
+{
+  "stats": {
+    "fixedSectionOk": true,
+    "nodesRecovered": 0,
+    "edgesRestored": 0,
+    "crossBatchEdgesAdded": 6,
+    "typesRemapped": 0,
+    "complexityRemapped": 0,
+    "testedByEdgesRestored": 5,
+    "totalEdgesRecommended": 11
+  },
+  "recoveredEdges": [
+    {
+      "source": "file:packages/ai/src/auth/helpers.ts",
+      "target": "file:packages/ai/test/test_auth.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6,
+      "rationale": "test_auth.ts 直接 import 并实例化 envApiKeyAuth,验证其 resolve 流程;importMap 已声明 imports 关系,可对应建立 tested_by 反向边。"
+    },
+    {
+      "source": "file:packages/ai/src/models.ts",
+      "target": "file:packages/ai/test/test_models.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6,
+      "rationale": "test_models.ts 通过 createProvider 组装 Provider 实例,验证工厂装配链路;importMap 已声明 imports。"
+    },
+    {
+      "source": "file:packages/ai/src/providers/openai.ts",
+      "target": "file:packages/ai/test/test_openai_provider.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6,
+      "rationale": "test_openai_provider.ts 是 openaiProvider 的烟雾测试;importMap 已声明 imports。"
+    },
+    {
+      "source": "file:packages/ai/src/providers/openai.ts",
+      "target": "file:packages/ai/test/test_openai_provider_stream.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6,
+      "rationale": "test_openai_provider_stream.ts 是 openaiProvider 的 e2e streaming 测试;importMap 已声明 imports。"
+    },
+    {
+      "source": "file:packages/ai/src/providers/minimax.ts",
+      "target": "file:packages/ai/test/test_minimax_provider.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6,
+      "rationale": "test_minimax_provider.ts 是 minimaxProvider 的烟雾测试;importMap 已声明 imports。"
+    },
+    {
+      "source": "file:packages/ai/src/api/anthropic-messages.ts",
+      "target": "file:packages/ai/test/test_minimax_raw_provider.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6,
+      "rationale": "test_minimax_raw_provider.ts 直接调用 callAnthropicMessages 验证 raw transport;文件名虽含 minimax,但实际测的是 anthropic-messages transport,importMap 已声明该 imports 关系。"
+    },
+    {
+      "source": "file:packages/ai/src/models.ts",
+      "target": "file:packages/ai/src/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7,
+      "recoveredFromImportMap": true,
+      "rationale": "importMap 声明 models.ts → types.ts,但原图只有函数级 ProviderAuth depends_on,缺少文件级 imports 边。批 1 与批 3/4 跨批次未串联。"
+    },
+    {
+      "source": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+      "target": "function:packages/ai/src/models.ts:createProvider",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.9,
+      "rationale": "openaiProvider 函数体显式调用 createProvider({...}),但当前边为 file 级;补充函数级 calls 边以精确刻画注册路径。"
+    },
+    {
+      "source": "function:packages/ai/src/providers/minimax.ts:minimaxProvider",
+      "target": "function:packages/ai/src/models.ts:createProvider",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.9,
+      "rationale": "minimaxProvider 函数体显式调用 createProvider({...});同 openaiProvider 一致,补充函数级 calls 边。"
+    },
+    {
+      "source": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+      "target": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8,
+      "rationale": "openaiProvider 通过 envApiKeyAuth(\"OpenAI API key\", [\"OPENAI_API_KEY\"]) 装配鉴权,补充函数级 calls 边。"
+    },
+    {
+      "source": "function:packages/ai/src/providers/minimax.ts:minimaxProvider",
+      "target": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8,
+      "rationale": "minimaxProvider 通过 envApiKeyAuth(\"MiniMax API key\", [\"MINIMAX_API_KEY\"]) 装配鉴权,补充函数级 calls 边。"
+    }
+  ],
+  "droppedEdges": [
+    {
+      "source": "config:package.json",
+      "target": "file:packages/ai/src/index.ts",
+      "type": "configures",
+      "decision": "正确丢弃",
+      "rationale": "项目根目录不存在 packages/ai/src/index.ts(已验证:ls packages/ai/src/ 仅含 api/auth/models.ts/providers/types.ts/utils),package.json 实际通过 ESM workspaces 间接管理 packages/ai,没有针对 index.ts 的直接 configures 关系;该边为 LLM 幻觉产物,丢弃合理。"
+    },
+    {
+      "source": "file:packages/ai/test/test_auth.ts",
+      "target": "file:packages/ai/test/test_auth.ts",
+      "type": "tested_by",
+      "decision": "正确丢弃(自环/同源同标)",
+      "rationale": "test↔test 自环属于 merge 脚本的 prod↔prod 防护命中,丢弃正确。"
+    },
+    {
+      "source": "file:packages/ai/src/auth/helpers.ts",
+      "target": "file:packages/ai/src/auth/helpers.ts",
+      "type": "tested_by",
+      "decision": "正确丢弃(自环)",
+      "rationale": "production↔production 自环,丢弃正确。"
+    },
+    {
+      "source": "file:packages/ai/src/api/openai-responses.ts",
+      "target": "file:packages/ai/src/api/openai-responses.ts",
+      "type": "tested_by",
+      "decision": "正确丢弃(自环)",
+      "rationale": "production↔production 自环,丢弃正确。"
+    },
+    {
+      "source": "file:packages/ai/src/api/anthropic-messages.ts",
+      "target": "file:packages/ai/src/api/anthropic-messages.ts",
+      "type": "tested_by",
+      "decision": "正确丢弃(自环)",
+      "rationale": "production↔production 自环,丢弃正确。"
+    }
+  ],
+  "notes": [
+    "Fixed 阶段仅命中 9 条 tested_by 自环/同源边,属预期清理,无需重做。",
+    "Could-not-fix 中的 package.json → index.ts 边目标文件不存在,属 LLM 幻觉,丢弃正确;无补偿动作必要。",
+    "本次跨批次补回:6 条 imports/calls/tested_by 边,其中 5 条 tested_by 基于 importMap 反向推断(importMap 不直接记录 tested_by 边),与现有测试↔生产调用图一致。",
+    "Batch-1(批 1)与 Batch-3/4 跨批未串联:models.ts → types.ts 的 file-level imports 边已在 importMap 中声明但被遗漏,通过 recoveredFromImportMap 补回。",
+    "openai/minimax provider 工厂调用 createProvider 与 envApiKeyAuth 当前为 file 级 calls,补充为函数级以精确刻画注册路径,便于后续架构层分析。",
+    "节点摘要、tags、complexity 字段全部到位,无需补全。",
+    "未发现未知 type 或未知 complexity 值。",
+    "test_minimax_raw_provider.ts 虽以 minimax 命名,实际测 raw Anthropic 风格 transport,因此 tested_by 指向 anthropic-messages.ts 而非 minimax.ts;这一非对称已在 rationale 中标注。"
+  ],
+  "recoverySuggestions": [
+    {
+      "id": "edge-suggestion-1",
+      "description": "补回 production↔test 的 tested_by 边,共 5 条,均以 importMap 中的反向 imports 为依据。",
+      "edges": [
+        {
+          "source": "file:packages/ai/src/auth/helpers.ts",
+          "target": "file:packages/ai/test/test_auth.ts",
+          "type": "tested_by",
+          "direction": "forward",
+          "weight": 0.6
+        },
+        {
+          "source": "file:packages/ai/src/models.ts",
+          "target": "file:packages/ai/test/test_models.ts",
+          "type": "tested_by",
+          "direction": "forward",
+          "weight": 0.6
+        },
+        {
+          "source": "file:packages/ai/src/providers/openai.ts",
+          "target": "file:packages/ai/test/test_openai_provider.ts",
+          "type": "tested_by",
+          "direction": "forward",
+          "weight": 0.6
+        },
+        {
+          "source": "file:packages/ai/src/providers/openai.ts",
+          "target": "file:packages/ai/test/test_openai_provider_stream.ts",
+          "type": "tested_by",
+          "direction": "forward",
+          "weight": 0.6
+        },
+        {
+          "source": "file:packages/ai/src/providers/minimax.ts",
+          "target": "file:packages/ai/test/test_minimax_provider.ts",
+          "type": "tested_by",
+          "direction": "forward",
+          "weight": 0.6
+        },
+        {
+          "source": "file:packages/ai/src/api/anthropic-messages.ts",
+          "target": "file:packages/ai/test/test_minimax_raw_provider.ts",
+          "type": "tested_by",
+          "direction": "forward",
+          "weight": 0.6
+        }
+      ]
+    },
+    {
+      "id": "edge-suggestion-2",
+      "description": "补回 file:packages/ai/src/models.ts → file:packages/ai/src/types.ts 的 file-level imports 边(importMap 已声明,merge 阶段跨批遗漏)。",
+      "edges": [
+        {
+          "source": "file:packages/ai/src/models.ts",
+          "target": "file:packages/ai/src/types.ts",
+          "type": "imports",
+          "direction": "forward",
+          "weight": 0.7,
+          "recoveredFromImportMap": true
+        }
+      ]
+    },
+    {
+      "id": "edge-suggestion-3",
+      "description": "补回 provider 工厂函数到 createProvider/envApiKeyAuth 的函数级 calls 边,以替代/补充现有 file-level 边。",
+      "edges": [
+        {
+          "source": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+          "target": "function:packages/ai/src/models.ts:createProvider",
+          "type": "calls",
+          "direction": "forward",
+          "weight": 0.9
+        },
+        {
+          "source": "function:packages/ai/src/providers/minimax.ts:minimaxProvider",
+          "target": "function:packages/ai/src/models.ts:createProvider",
+          "type": "calls",
+          "direction": "forward",
+          "weight": 0.9
+        },
+        {
+          "source": "function:packages/ai/src/providers/openai.ts:openaiProvider",
+          "target": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+          "type": "calls",
+          "direction": "forward",
+          "weight": 0.8
+        },
+        {
+          "source": "function:packages/ai/src/providers/minimax.ts:minimaxProvider",
+          "target": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+          "type": "calls",
+          "direction": "forward",
+          "weight": 0.8
+        }
+      ]
+    }
+  ],
+  "summary": "审查完成。Fixed 阶段仅丢弃 9 条 production↔production/test↔test 自环,数量合理,无需重做;Could-not-fix 中的 package.json → index.ts 边目标文件不存在,属 LLM 幻觉,丢弃正确。本次补充 11 条语义边,其中 5 条为基于 importMap 反向推断的 tested_by 边(覆盖 helpers/models/openai-provider/openai-stream/minimax-provider),1 条为 models.ts → types.ts 的跨批遗漏 imports 边,4 条为 provider 工厂函数对 createProvider/envApiKeyAuth 的精确函数级 calls 边。test_minimax_raw_provider.ts 实际测试 anthropic-messages transport,tested_by 边已正确指向该文件。未发现未知类型或复杂度值,节点摘要与 tags 均到位。"
+}

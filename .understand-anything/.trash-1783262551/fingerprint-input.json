@@ -1,0 +1,5 @@
+{
+  "projectRoot": "/home/charles/i",
+  "sourceFilePaths": [".codeiumignore",".continue/rules/answer-only.md",".cursorignore",".env",".github/copilot-instructions.md",".understand-anything/.understandignore",".understand-anything/config.json",".understand-anything/tmp/gen-ignore.cjs",".windsurfrules","draft.md","GEMINI.md","package.json","packages/ai/src/api/anthropic-messages.ts","packages/ai/src/api/openai-responses.lazy.ts","packages/ai/src/api/openai-responses.ts","packages/ai/src/auth/helpers.ts","packages/ai/src/auth/types.ts","packages/ai/src/models.ts","packages/ai/src/providers/minimax.models.ts","packages/ai/src/providers/minimax.ts","packages/ai/src/providers/openai.models.ts","packages/ai/src/providers/openai.ts","packages/ai/src/types.ts","packages/ai/src/utils/event-stream.ts","packages/ai/test/test_auth.ts","packages/ai/test/test_minimax_provider.ts","packages/ai/test/test_minimax_raw_provider.ts","packages/ai/test/test_models.ts","packages/ai/test/test_openai_provider_stream.ts","packages/ai/test/test_openai_provider.ts"],
+  "gitCommitHash": "24516d4e70f17c9713e6875a738340591d4b3c0b"
+}

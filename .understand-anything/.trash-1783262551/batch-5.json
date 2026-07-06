@@ -1,0 +1,85 @@
+{
+  "batchIndex": 5,
+  "batchFiles": [
+    {"path": ".env", "language": "config", "sizeLines": 5, "fileCategory": "config"},
+    {"path": "GEMINI.md", "language": "markdown", "sizeLines": 9, "fileCategory": "docs"},
+    {"path": "draft.md", "language": "markdown", "sizeLines": 422, "fileCategory": "docs"},
+    {"path": "package.json", "language": "json", "sizeLines": 9, "fileCategory": "config"}
+  ],
+  "nodes": [
+    {
+      "id": "config:.env",
+      "type": "config",
+      "name": ".env",
+      "filePath": ".env",
+      "summary": "工作区根级环境变量配置,集中放置 OpenAI 与 MiniMax provider 的鉴权 key、base URL 以及 Node 代理开关,供运行时 dotenv 加载。",
+      "tags": ["configuration", "environment", "secrets", "provider-config", "runtime"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:GEMINI.md",
+      "type": "document",
+      "name": "GEMINI.md",
+      "filePath": "GEMINI.md",
+      "summary": "Gemini AI 客户端的工作区规则文件,声明本目录为 answer-only 模式,强制只读 review、禁止生成/编辑代码或运行变更命令,引用 .ai-answer-only-policy.md。",
+      "tags": ["documentation", "ai-policy", "answer-only", "rule"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:draft.md",
+      "type": "document",
+      "name": "draft.md",
+      "filePath": "draft.md",
+      "summary": "项目核心工程规范文档(中文),覆盖最小技术栈选型、目录治理、spec-driven 开发流程、Top-Down 设计、Interface 原则、TDD 与 CI 门禁,以及最小基建落地路线图与不该做的反模式。",
+      "tags": ["documentation", "engineering-spec", "tdd", "ci-cd", "workflow"],
+      "complexity": "complex",
+      "languageNotes": "文档以中文撰写,采用加粗小标题分节并大量使用表格枚举约束,作为本仓库的 canonical 规范。"
+    },
+    {
+      "id": "config:package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "package.json",
+      "summary": "工作区根 manifest,声明 ESM (`type: module`)、唯一运行时依赖 `dotenv`,以及开发依赖 `@types/node`,无 scripts 字段,作为 monorepo 根级公共配置。",
+      "tags": ["configuration", "manifest", "monorepo", "esm", "dotenv"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:.env",
+      "target": "config:package.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "document:GEMINI.md",
+      "target": "document:draft.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:draft.md",
+      "target": "config:package.json",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:draft.md",
+      "target": "config:.env",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:package.json",
+      "target": "file:packages/ai/src/index.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

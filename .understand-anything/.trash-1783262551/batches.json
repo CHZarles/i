@@ -1,0 +1,504 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "louvain",
+  "totalFiles": 30,
+  "totalBatches": 6,
+  "exportsByPath": {
+    ".codeiumignore": [],
+    ".cursorignore": [],
+    ".understand-anything/.understandignore": [],
+    ".understand-anything/tmp/gen-ignore.cjs": [],
+    ".windsurfrules": [],
+    "packages/ai/src/api/anthropic-messages.ts": [
+      "callAnthropicMessages"
+    ],
+    "packages/ai/src/api/openai-responses.lazy.ts": [
+      "openAIResponsesApi"
+    ],
+    "packages/ai/src/api/openai-responses.ts": [
+      "streamSimple",
+      "stream"
+    ],
+    "packages/ai/src/auth/helpers.ts": [
+      "envApiKeyAuth"
+    ],
+    "packages/ai/src/auth/types.ts": [],
+    "packages/ai/src/models.ts": [
+      "createProvider"
+    ],
+    "packages/ai/src/providers/minimax.models.ts": [
+      "MINIMAX_MODELS"
+    ],
+    "packages/ai/src/providers/minimax.ts": [
+      "minimaxProvider"
+    ],
+    "packages/ai/src/providers/openai.models.ts": [
+      "OPENAI_MODELS"
+    ],
+    "packages/ai/src/providers/openai.ts": [
+      "openaiProvider"
+    ],
+    "packages/ai/src/types.ts": [
+      "AssistantMessageEventStream"
+    ],
+    "packages/ai/src/utils/event-stream.ts": [
+      "EventStream",
+      "AssistantMessageEventStream"
+    ],
+    "packages/ai/test/test_auth.ts": [],
+    "packages/ai/test/test_minimax_provider.ts": [],
+    "packages/ai/test/test_minimax_raw_provider.ts": [],
+    "packages/ai/test/test_models.ts": [],
+    "packages/ai/test/test_openai_provider_stream.ts": [],
+    "packages/ai/test/test_openai_provider.ts": []
+  },
+  "batches": [
+    {
+      "batchIndex": 1,
+      "files": [
+        {
+          "path": "packages/ai/src/auth/helpers.ts",
+          "language": "typescript",
+          "sizeLines": 35,
+          "fileCategory": "code"
+        },
+        {
+          "path": "packages/ai/src/auth/types.ts",
+          "language": "typescript",
+          "sizeLines": 83,
+          "fileCategory": "code"
+        },
+        {
+          "path": "packages/ai/src/models.ts",
+          "language": "typescript",
+          "sizeLines": 70,
+          "fileCategory": "code"
+        },
+        {
+          "path": "packages/ai/test/test_auth.ts",
+          "language": "typescript",
+          "sizeLines": 22,
+          "fileCategory": "code"
+        },
+        {
+          "path": "packages/ai/test/test_models.ts",
+          "language": "typescript",
+          "sizeLines": 27,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "packages/ai/src/auth/helpers.ts": [
+          "packages/ai/src/auth/types.ts"
+        ],
+        "packages/ai/src/auth/types.ts": [
+          "packages/ai/src/types.ts"
+        ],
+        "packages/ai/src/models.ts": [
+          "packages/ai/src/auth/types.ts",
+          "packages/ai/src/types.ts"
+        ],
+        "packages/ai/test/test_auth.ts": [
+          "packages/ai/src/auth/helpers.ts"
+        ],
+        "packages/ai/test/test_models.ts": [
+          "packages/ai/src/auth/helpers.ts",
+          "packages/ai/src/models.ts"
+        ]
+      },
+      "neighborMap": {
+        "packages/ai/src/auth/helpers.ts": [
+          {
+            "path": "packages/ai/src/providers/minimax.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "minimaxProvider"
+            ]
+          },
+          {
+            "path": "packages/ai/src/providers/openai.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "openaiProvider"
+            ]
+          }
+        ],
+        "packages/ai/src/auth/types.ts": [
+          {
+            "path": "packages/ai/src/types.ts",
+            "batchIndex": 2,
+            "symbols": [
+              "AssistantMessageEventStream"
+            ]
+          }
+        ],
+        "packages/ai/src/models.ts": [
+          {
+            "path": "packages/ai/src/types.ts",
+            "batchIndex": 2,
+            "symbols": [
+              "AssistantMessageEventStream"
+            ]
+          },
+          {
+            "path": "packages/ai/src/providers/minimax.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "minimaxProvider"
+            ]
+          },
+          {
+            "path": "packages/ai/src/providers/openai.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "openaiProvider"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 2,
+      "files": [
+        {
+          "path": "packages/ai/src/api/openai-responses.lazy.ts",
+          "language": "typescript",
+          "sizeLines": 4,
+          "fileCategory": "code"
+        },
+        {
+          "path": "packages/ai/src/api/openai-responses.ts",
+          "language": "typescript",
+          "sizeLines": 134,
+          "fileCategory": "code"
+        },
+        {
+          "path": "packages/ai/src/types.ts",
+          "language": "typescript",
+          "sizeLines": 106,
+          "fileCategory": "code"
+        },
+        {
+          "path": "packages/ai/src/utils/event-stream.ts",
+          "language": "typescript",
+          "sizeLines": 83,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "packages/ai/src/api/openai-responses.lazy.ts": [
+          "packages/ai/src/api/openai-responses.ts",
+          "packages/ai/src/types.ts"
+        ],
+        "packages/ai/src/api/openai-responses.ts": [
+          "packages/ai/src/types.ts",
+          "packages/ai/src/utils/event-stream.ts"
+        ],
+        "packages/ai/src/types.ts": [
+          "packages/ai/src/utils/event-stream.ts"
+        ],
+        "packages/ai/src/utils/event-stream.ts": [
+          "packages/ai/src/types.ts"
+        ]
+      },
+      "neighborMap": {
+        "packages/ai/src/api/openai-responses.lazy.ts": [
+          {
+            "path": "packages/ai/src/providers/openai.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "openaiProvider"
+            ]
+          }
+        ],
+        "packages/ai/src/types.ts": [
+          {
+            "path": "packages/ai/src/auth/types.ts",
+            "batchIndex": 1,
+            "symbols": []
+          },
+          {
+            "path": "packages/ai/src/models.ts",
+            "batchIndex": 1,
+            "symbols": [
+              "createProvider"
+            ]
+          },
+          {
+            "path": "packages/ai/src/providers/minimax.models.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "MINIMAX_MODELS"
+            ]
+          },
+          {
+            "path": "packages/ai/src/providers/openai.models.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "OPENAI_MODELS"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 3,
+      "files": [
+        {
+          "path": "packages/ai/src/providers/openai.models.ts",
+          "language": "typescript",
+          "sizeLines": 15,
+          "fileCategory": "code"
+        },
+        {
+          "path": "packages/ai/src/providers/openai.ts",
+          "language": "typescript",
+          "sizeLines": 17,
+          "fileCategory": "code"
+        },
+        {
+          "path": "packages/ai/test/test_openai_provider.ts",
+          "language": "typescript",
+          "sizeLines": 8,
+          "fileCategory": "code"
+        },
+        {
+          "path": "packages/ai/test/test_openai_provider_stream.ts",
+          "language": "typescript",
+          "sizeLines": 40,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "packages/ai/src/providers/openai.models.ts": [
+          "packages/ai/src/types.ts"
+        ],
+        "packages/ai/src/providers/openai.ts": [
+          "packages/ai/src/api/openai-responses.lazy.ts",
+          "packages/ai/src/auth/helpers.ts",
+          "packages/ai/src/models.ts",
+          "packages/ai/src/providers/openai.models.ts"
+        ],
+        "packages/ai/test/test_openai_provider.ts": [
+          "packages/ai/src/providers/openai.ts"
+        ],
+        "packages/ai/test/test_openai_provider_stream.ts": [
+          "packages/ai/src/providers/openai.ts"
+        ]
+      },
+      "neighborMap": {
+        "packages/ai/src/providers/openai.models.ts": [
+          {
+            "path": "packages/ai/src/types.ts",
+            "batchIndex": 2,
+            "symbols": [
+              "AssistantMessageEventStream"
+            ]
+          }
+        ],
+        "packages/ai/src/providers/openai.ts": [
+          {
+            "path": "packages/ai/src/api/openai-responses.lazy.ts",
+            "batchIndex": 2,
+            "symbols": [
+              "openAIResponsesApi"
+            ]
+          },
+          {
+            "path": "packages/ai/src/auth/helpers.ts",
+            "batchIndex": 1,
+            "symbols": [
+              "envApiKeyAuth"
+            ]
+          },
+          {
+            "path": "packages/ai/src/models.ts",
+            "batchIndex": 1,
+            "symbols": [
+              "createProvider"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 4,
+      "files": [
+        {
+          "path": "packages/ai/src/providers/minimax.models.ts",
+          "language": "typescript",
+          "sizeLines": 15,
+          "fileCategory": "code"
+        },
+        {
+          "path": "packages/ai/src/providers/minimax.ts",
+          "language": "typescript",
+          "sizeLines": 15,
+          "fileCategory": "code"
+        },
+        {
+          "path": "packages/ai/test/test_minimax_provider.ts",
+          "language": "typescript",
+          "sizeLines": 20,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "packages/ai/src/providers/minimax.models.ts": [
+          "packages/ai/src/types.ts"
+        ],
+        "packages/ai/src/providers/minimax.ts": [
+          "packages/ai/src/auth/helpers.ts",
+          "packages/ai/src/models.ts",
+          "packages/ai/src/providers/minimax.models.ts"
+        ],
+        "packages/ai/test/test_minimax_provider.ts": [
+          "packages/ai/src/providers/minimax.ts"
+        ]
+      },
+      "neighborMap": {
+        "packages/ai/src/providers/minimax.models.ts": [
+          {
+            "path": "packages/ai/src/types.ts",
+            "batchIndex": 2,
+            "symbols": [
+              "AssistantMessageEventStream"
+            ]
+          }
+        ],
+        "packages/ai/src/providers/minimax.ts": [
+          {
+            "path": "packages/ai/src/auth/helpers.ts",
+            "batchIndex": 1,
+            "symbols": [
+              "envApiKeyAuth"
+            ]
+          },
+          {
+            "path": "packages/ai/src/models.ts",
+            "batchIndex": 1,
+            "symbols": [
+              "createProvider"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 5,
+      "files": [
+        {
+          "path": ".env",
+          "language": "config",
+          "sizeLines": 5,
+          "fileCategory": "config"
+        },
+        {
+          "path": "GEMINI.md",
+          "language": "markdown",
+          "sizeLines": 9,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "draft.md",
+          "language": "markdown",
+          "sizeLines": 422,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "package.json",
+          "language": "json",
+          "sizeLines": 9,
+          "fileCategory": "config"
+        }
+      ],
+      "batchImportData": {
+        ".env": [],
+        "GEMINI.md": [],
+        "draft.md": [],
+        "package.json": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 6,
+      "files": [
+        {
+          "path": ".codeiumignore",
+          "language": "unknown",
+          "sizeLines": 5,
+          "fileCategory": "code"
+        },
+        {
+          "path": ".continue/rules/answer-only.md",
+          "language": "markdown",
+          "sizeLines": 13,
+          "fileCategory": "docs"
+        },
+        {
+          "path": ".cursorignore",
+          "language": "unknown",
+          "sizeLines": 6,
+          "fileCategory": "code"
+        },
+        {
+          "path": ".github/copilot-instructions.md",
+          "language": "markdown",
+          "sizeLines": 9,
+          "fileCategory": "docs"
+        },
+        {
+          "path": ".understand-anything/.understandignore",
+          "language": "unknown",
+          "sizeLines": 21,
+          "fileCategory": "code"
+        },
+        {
+          "path": ".understand-anything/config.json",
+          "language": "json",
+          "sizeLines": 4,
+          "fileCategory": "config"
+        },
+        {
+          "path": ".understand-anything/tmp/gen-ignore.cjs",
+          "language": "javascript",
+          "sizeLines": 21,
+          "fileCategory": "code"
+        },
+        {
+          "path": ".windsurfrules",
+          "language": "unknown",
+          "sizeLines": 9,
+          "fileCategory": "code"
+        },
+        {
+          "path": "packages/ai/src/api/anthropic-messages.ts",
+          "language": "typescript",
+          "sizeLines": 47,
+          "fileCategory": "code"
+        },
+        {
+          "path": "packages/ai/test/test_minimax_raw_provider.ts",
+          "language": "typescript",
+          "sizeLines": 23,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        ".codeiumignore": [],
+        ".continue/rules/answer-only.md": [],
+        ".cursorignore": [],
+        ".github/copilot-instructions.md": [],
+        ".understand-anything/.understandignore": [],
+        ".understand-anything/config.json": [],
+        ".understand-anything/tmp/gen-ignore.cjs": [],
+        ".windsurfrules": [],
+        "packages/ai/src/api/anthropic-messages.ts": [],
+        "packages/ai/test/test_minimax_raw_provider.ts": [
+          "packages/ai/src/api/anthropic-messages.ts"
+        ]
+      },
+      "neighborMap": {}
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+[
+  {
+    "id": "layer:type-definitions",
+    "name": "类型定义层",
+    "description": "ai 包的核心类型中枢,定义 Model、Message、Usage、Context、ProviderStreams、StreamFunction 等公共契约,并通过 EventStream 泛型队列与 AssistantMessageEventStream 特化为 SSE 流式事件容器,被所有上层模块共享引用(fan-in 最高)。",
+    "nodeIds": [
+      "file:packages/ai/src/types.ts",
+      "file:packages/ai/src/utils/event-stream.ts"
+    ]
+  },
+  {
+    "id": "layer:api-transport",
+    "name": "API 与传输层",
+    "description": "与上游 LLM 服务直接通信的 transport 模块:openai-responses.ts 实现 OpenAI Responses API 流式适配并产出 AssistantMessageEventStream,openai-responses.lazy.ts 提供按需加载的惰性包装,anthropic-messages.ts 实现 Anthropic Messages API 的非流式 POST 调用。",
+    "nodeIds": [
+      "file:packages/ai/src/api/openai-responses.ts",
+      "file:packages/ai/src/api/openai-responses.lazy.ts",
+      "file:packages/ai/src/api/anthropic-messages.ts"
+    ]
+  },
+  {
+    "id": "layer:auth-abstraction",
+    "name": "鉴权抽象层",
+    "description": "统一 provider 鉴权抽象:auth/types.ts 定义 ModelAuth/ApiKeyAuth/ProviderAuth 等接口契约,auth/helpers.ts 提供 envApiKeyAuth 工厂,封装 stored credential → env 变量回退的鉴权解析流程,供各 provider 复用。",
+    "nodeIds": [
+      "file:packages/ai/src/auth/types.ts",
+      "file:packages/ai/src/auth/helpers.ts"
+    ]
+  },
+  {
+    "id": "layer:provider-registry",
+    "name": "Provider 注册层",
+    "description": "Provider 装配与注册中心:models.ts 通过 createProvider 工厂把模型列表、auth、stream 实现装配成统一 Provider 实例;providers/openai.ts 与 providers/minimax.ts 分别为 OpenAI Responses 与 MiniMax(Anthropic Messages 兼容)provider 提供注册入口,*.models.ts 声明各自的静态模型目录并以 satisfies 约束类型。",
+    "nodeIds": [
+      "file:packages/ai/src/models.ts",
+      "file:packages/ai/src/providers/openai.ts",
+      "file:packages/ai/src/providers/openai.models.ts",
+      "file:packages/ai/src/providers/minimax.ts",
+      "file:packages/ai/src/providers/minimax.models.ts"
+    ]
+  },
+  {
+    "id": "layer:test-suite",
+    "name": "测试层",
+    "description": "packages/ai/test 下的轻量级 smoke / e2e 脚本集合:覆盖 envApiKeyAuth 鉴权解析、createProvider 装配流程、openaiProvider / minimaxProvider 实例化与流式输出、以及对 raw Anthropic Messages API 的集成验证,失败时以 exit 1 终止。",
+    "nodeIds": [
+      "file:packages/ai/test/test_auth.ts",
+      "file:packages/ai/test/test_models.ts",
+      "file:packages/ai/test/test_openai_provider.ts",
+      "file:packages/ai/test/test_openai_provider_stream.ts",
+      "file:packages/ai/test/test_minimax_provider.ts",
+      "file:packages/ai/test/test_minimax_raw_provider.ts"
+    ]
+  },
+  {
+    "id": "layer:workspace-config",
+    "name": "工作区配置",
+    "description": "monorepo 根级 manifest 与运行时配置:package.json 声明 ESM 与 dotenv 依赖,.env 集中放置 OpenAI / MiniMax provider 的鉴权 key、baseUrl 与 Node 代理开关,.understand-anything/config.json 控制扫描工具行为,以及 tmp/gen-ignore.cjs 临时脚手架脚本。",
+    "nodeIds": [
+      "config:package.json",
+      "config:.env",
+      "config:.understand-anything/config.json",
+      "file:.understand-anything/tmp/gen-ignore.cjs"
+    ]
+  },
+  {
+    "id": "layer:ai-client-rules",
+    "name": "AI 客户端规则",
+    "description": "多种 AI 编辑器 / 补全客户端在本仓库的忽略规则与回答策略:Codeium、Cursor、Windsurf、Continue、GitHub Copilot、understand-anything 等各自的 ignore 或 policy 文件,约束 AI 客户端在本目录下的索引范围与回答行为。",
+    "nodeIds": [
+      "document:.codeiumignore",
+      "document:.cursorignore",
+      "document:.windsurfrules",
+      "document:.continue/rules/answer-only.md",
+      "document:.github/copilot-instructions.md",
+      "document:.understand-anything/.understandignore"
+    ]
+  },
+  {
+    "id": "layer:documentation",
+    "name": "项目文档",
+    "description": "本仓库的 canonical 工程规范与跨客户端协作策略:draft.md(中文)覆盖最小技术栈、目录治理、spec-driven 流程、Top-Down 设计、TDD 与 CI 门禁等规范,GEMINI.md 声明 Gemini AI 客户端在本目录下的 answer-only 策略。",
+    "nodeIds": [
+      "document:draft.md",
+      "document:GEMINI.md"
+    ]
+  }
+]

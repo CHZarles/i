@@ -1,0 +1,350 @@
+{
+  "nodes": [
+    {
+      "id": "file:packages/ai/src/auth/helpers.ts",
+      "type": "file",
+      "name": "helpers.ts",
+      "filePath": "packages/ai/src/auth/helpers.ts",
+      "summary": "提供标准的 envApiKeyAuth 工厂函数,封装“stored credential → env 变量回退”的鉴权解析流程,供各 AI provider 复用。",
+      "tags": ["auth", "helper", "api-key", "factory"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+      "type": "function",
+      "name": "envApiKeyAuth",
+      "filePath": "packages/ai/src/auth/helpers.ts",
+      "lineRange": [9, 35],
+      "summary": "构造一个 ApiKeyAuth:login 阶段通过回调提示用户输入密钥,resolve 阶段优先使用已存储密钥,否则按顺序尝试给定 env 变量。",
+      "tags": ["auth", "factory", "api-key", "login", "resolve"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:packages/ai/src/auth/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "packages/ai/src/auth/types.ts",
+      "summary": "定义鉴权模块的全部接口契约:ModelAuth、ApiKeyCredential、AuthContext、AuthResult、AuthPrompt、AuthLoginCallbacks、ApiKeyAuth、ProviderAuth,统一 provider 鉴权抽象。",
+      "tags": ["auth", "type-definition", "interface", "contract"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:packages/ai/src/auth/types.ts:ModelAuth",
+      "type": "class",
+      "name": "ModelAuth",
+      "filePath": "packages/ai/src/auth/types.ts",
+      "lineRange": [7, 11],
+      "summary": "单次模型请求的鉴权字段,只承载 apiKey / headers / baseUrl,其他 provider 配置不属于鉴权范畴。",
+      "tags": ["interface", "auth", "type-definition"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:packages/ai/src/auth/types.ts:ApiKeyCredential",
+      "type": "class",
+      "name": "ApiKeyCredential",
+      "filePath": "packages/ai/src/auth/types.ts",
+      "lineRange": [17, 21],
+      "summary": "持久化的 api-key 凭据:type 固定为 'api_key',key 为可选密钥,env 承载 provider 作用域的配置(例如 Cloudflare account/gateway id)。",
+      "tags": ["interface", "credential", "auth"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:packages/ai/src/auth/types.ts:AuthContext",
+      "type": "class",
+      "name": "AuthContext",
+      "filePath": "packages/ai/src/auth/types.ts",
+      "lineRange": [24, 26],
+      "summary": "鉴权阶段的环境访问抽象,通过 env(name) 异步取值,便于在测试或浏览器场景注入。",
+      "tags": ["interface", "auth", "injectable"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:packages/ai/src/auth/types.ts:AuthResult",
+      "type": "class",
+      "name": "AuthResult",
+      "filePath": "packages/ai/src/auth/types.ts",
+      "lineRange": [29, 35],
+      "summary": "鉴权解析结果:auth 字段承载最终 ModelAuth,env 为 provider 作用域环境,source 为可读的来源标签(如 'ANTHROPIC_API_KEY')。",
+      "tags": ["interface", "auth", "result"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:packages/ai/src/auth/types.ts:AuthLoginCallbacks",
+      "type": "class",
+      "name": "AuthLoginCallbacks",
+      "filePath": "packages/ai/src/auth/types.ts",
+      "lineRange": [48, 50],
+      "summary": "登录交互回调接口,prompt() 返回用户输入的密钥字符串,取消/中止时 reject。",
+      "tags": ["interface", "auth", "login", "callback"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:packages/ai/src/auth/types.ts:ApiKeyAuth",
+      "type": "class",
+      "name": "ApiKeyAuth",
+      "filePath": "packages/ai/src/auth/types.ts",
+      "lineRange": [56, 74],
+      "summary": "ApiKey 鉴权契约:含 name 与可选的 login,以及 resolve(model, ctx, credential) 用于按字段合并 stored + ambient 来源。",
+      "tags": ["interface", "auth", "api-key", "resolve"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:packages/ai/src/auth/types.ts:ProviderAuth",
+      "type": "class",
+      "name": "ProviderAuth",
+      "filePath": "packages/ai/src/auth/types.ts",
+      "lineRange": [81, 83],
+      "summary": "Provider 鉴权聚合根,apiKey 必须存在(即使 ambient / keyless 也要提供 apiKey 接口以表达配置状态)。",
+      "tags": ["interface", "auth", "provider"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/src/models.ts",
+      "type": "file",
+      "name": "models.ts",
+      "filePath": "packages/ai/src/models.ts",
+      "summary": "定义 Provider / CreateProviderOptions 核心接口,提供 createProvider 工厂将元数据(模型列表、auth、stream 实现)装配为统一 Provider 实例。",
+      "tags": ["provider", "factory", "type-definition", "models"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:packages/ai/src/models.ts:Provider",
+      "type": "class",
+      "name": "Provider",
+      "filePath": "packages/ai/src/models.ts",
+      "lineRange": [14, 40],
+      "summary": "统一 Provider 契约:携带 id / name / baseUrl / headers / auth,getModels() 返回静态目录,stream 与 streamSimple 返回 AssistantMessageEventStream。",
+      "tags": ["interface", "provider", "stream"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:packages/ai/src/models.ts:CreateProviderOptions",
+      "type": "class",
+      "name": "CreateProviderOptions",
+      "filePath": "packages/ai/src/models.ts",
+      "lineRange": [42, 53],
+      "summary": "createProvider 的入参契约:id/name/baseUrl/headers/auth(必填)/models(初始列表,空表示纯动态)/api(ProviderStreams)。",
+      "tags": ["interface", "provider", "options"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/ai/src/models.ts:createProvider",
+      "type": "function",
+      "name": "createProvider",
+      "filePath": "packages/ai/src/models.ts",
+      "lineRange": [55, 70],
+      "summary": "工厂函数:把 CreateProviderOptions 装配成 Provider 实例,getModels 直接返回入参列表,stream/streamSimple 转发到 input.api。",
+      "tags": ["factory", "provider", "assembly"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/test/test_auth.ts",
+      "type": "file",
+      "name": "test_auth.ts",
+      "filePath": "packages/ai/test/test_auth.ts",
+      "summary": "最小化烟测脚本:用 OPENAI_API_KEY env 变量名构造 envApiKeyAuth,传入假 ctx.env(读 process.env),打印 resolve 结果以人工/运行期验证。",
+      "tags": ["test", "auth", "smoke-test"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/ai/test/test_models.ts",
+      "type": "file",
+      "name": "test_models.ts",
+      "filePath": "packages/ai/test/test_models.ts",
+      "summary": "最小化烟测脚本:用 createProvider 构造 OpenAI provider,打印 provider.id 与首个 model id,验证装配流程。",
+      "tags": ["test", "provider", "smoke-test"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:packages/ai/src/auth/helpers.ts",
+      "target": "file:packages/ai/src/auth/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/auth/helpers.ts",
+      "target": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/auth/helpers.ts",
+      "target": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+      "target": "class:packages/ai/src/auth/types.ts:ApiKeyAuth",
+      "type": "implements",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:packages/ai/src/auth/types.ts",
+      "target": "class:packages/ai/src/auth/types.ts:ModelAuth",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/auth/types.ts",
+      "target": "class:packages/ai/src/auth/types.ts:ApiKeyCredential",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/auth/types.ts",
+      "target": "class:packages/ai/src/auth/types.ts:AuthContext",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/auth/types.ts",
+      "target": "class:packages/ai/src/auth/types.ts:AuthResult",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/auth/types.ts",
+      "target": "class:packages/ai/src/auth/types.ts:AuthLoginCallbacks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/auth/types.ts",
+      "target": "class:packages/ai/src/auth/types.ts:ApiKeyAuth",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/auth/types.ts",
+      "target": "class:packages/ai/src/auth/types.ts:ProviderAuth",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/models.ts",
+      "target": "file:packages/ai/src/auth/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/src/models.ts",
+      "target": "class:packages/ai/src/auth/types.ts:ProviderAuth",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:packages/ai/src/models.ts",
+      "target": "class:packages/ai/src/models.ts:Provider",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/models.ts",
+      "target": "class:packages/ai/src/models.ts:CreateProviderOptions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/models.ts",
+      "target": "function:packages/ai/src/models.ts:createProvider",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/ai/src/models.ts",
+      "target": "function:packages/ai/src/models.ts:createProvider",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:packages/ai/src/models.ts:createProvider",
+      "target": "class:packages/ai/src/models.ts:Provider",
+      "type": "implements",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:packages/ai/test/test_auth.ts",
+      "target": "file:packages/ai/src/auth/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/test/test_auth.ts",
+      "target": "file:packages/ai/src/auth/helpers.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:packages/ai/test/test_auth.ts",
+      "target": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/ai/test/test_models.ts",
+      "target": "file:packages/ai/src/auth/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/test/test_models.ts",
+      "target": "file:packages/ai/src/models.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/ai/test/test_models.ts",
+      "target": "file:packages/ai/src/models.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:packages/ai/test/test_models.ts",
+      "target": "file:packages/ai/src/auth/helpers.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:packages/ai/test/test_models.ts",
+      "target": "function:packages/ai/src/models.ts:createProvider",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/ai/test/test_models.ts",
+      "target": "function:packages/ai/src/auth/helpers.ts:envApiKeyAuth",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}
