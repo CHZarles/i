@@ -1,4 +1,5 @@
 import { minimaxProvider } from "../src/providers/minimax.ts";
+import assert from "node:assert/strict";
 
 const provider = minimaxProvider();
 const model = provider.getModels()[0]!;
@@ -18,3 +19,22 @@ const auth = await provider.auth.apiKey?.resolve({
 });
 
 console.log(auth?.source);
+
+const message = await provider
+  .streamSimple(
+    model,
+    {
+      messages: [
+        {
+          role: "user",
+          content: "Say hi",
+          timestamp: Date.now(),
+        },
+      ],
+    },
+    {},
+  )
+  .result();
+
+assert.equal(message.stopReason, "error");
+assert.match(message.errorMessage ?? "", /No API key/);
