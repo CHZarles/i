@@ -17,21 +17,52 @@ async function main() {
     .streamSimple(
       requestModel,
       {
+        systemPrompt: "You are a precise memory test. Reply with only the requested token.",
         messages: [
           {
             role: "user",
-            content: "Say hi",
+            content: "Remember this token: ctx-charles-7319.",
+            timestamp: Date.now(),
+          },
+          {
+            role: "assistant",
+            content: [{ type: "text", text: "OK" }],
+            api: requestModel.api,
+            provider: requestModel.provider,
+            model: requestModel.id,
+            usage: {
+              input: 0,
+              output: 0,
+              cacheRead: 0,
+              cacheWrite: 0,
+              totalTokens: 0,
+              cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
+            },
+            stopReason: "stop",
+            timestamp: Date.now(),
+          },
+          {
+            role: "user",
+            content: "What token did I ask you to remember?",
             timestamp: Date.now(),
           },
         ],
       },
       {
         apiKey: process.env.OPENAI_API_KEY,
+        maxTokens: 32,
       },
     )
     .result();
 
-  console.log(message.content.map((part) => part.text).join(""));
+  if (message.stopReason !== "stop") throw new Error(message.errorMessage);
+
+  const text = message.content.map((part) => part.text).join("");
+  if (!text.includes("ctx-charles-7319")) {
+    throw new Error(`Expected model to use conversation history, got: ${text}`);
+  }
+
+  console.log(text);
 }
 
 main().catch((error) => {

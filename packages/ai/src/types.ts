@@ -39,6 +39,8 @@ export interface Model<TApi extends Api = Api> {
 
   // provider 标识，表示模型属于哪个 provider。
   // 例如 "openai"、"minimax"，也可以是自定义 provider id。
+  provider: ProviderId;
+
   // 请求基础地址。
   // 例如 "https://api.openai.com/v1"。
   // 具体 endpoint 通常由 api adapter 拼接。
@@ -169,6 +171,7 @@ export type Message = UserMessage | AssistantMessage;
 // 调用模型时传入的上下文。
 // 本质就是当前对话历史。
 export interface Context {
+  systemPrompt?: string;
   messages: Message[];
 }
 

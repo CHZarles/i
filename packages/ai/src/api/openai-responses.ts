@@ -55,25 +55,50 @@ type OpenAIResponsesResponse = {
   };
 };
 
-// Extract the latest user message as the prompt sent to OpenAI.
-//
-// Current simplified Context only sends the last user message,
-// not the full conversation history.
-function promptFromContext(context: Context): string {
-  // Copy messages before reverse(), because reverse() mutates arrays.
-  const lastUser = [...context.messages]
-    // Search from newest to oldest.
-    .reverse()
-    // Pick the first user message.
-    .find((message) => message.role === "user");
+type ResponsesInputItem =
+  | { role: "system" | "developer"; content: string }
+  | { role: "user"; content: { type: "input_text"; text: string }[] }
+  | {
+      type: "message";
+      role: "assistant";
+      content: { type: "output_text"; text: string; annotations: [] }[];
+      status: "completed";
+    };
 
-  // Optional chaining:
-  // - if lastUser exists, return lastUser.content
-  // - otherwise return undefined
-  //
-  // Nullish coalescing:
-  // - if result is undefined/null, return ""
-  return lastUser?.content ?? "";
+function inputFromContext(
+  model: Model<"openai-responses">,
+  context: Context,
+): ResponsesInputItem[] {
+  const input: ResponsesInputItem[] = [];
+
+  if (context.systemPrompt) {
+    input.push({
+      role: model.reasoning ? "developer" : "system",
+      content: context.systemPrompt,
+    });
+  }
+
+  for (const message of context.messages) {
+    if (message.role === "user") {
+      input.push({
+        role: "user",
+        content: [{ type: "input_text", text: message.content }],
+      });
+      continue;
+    }
+
+    const text = message.content.map((block) => block.text).join("");
+    if (!text) continue;
+
+    input.push({
+      type: "message",
+      role: "assistant",
+      content: [{ type: "output_text", text, annotations: [] }],
+      status: "completed",
+    });
+  }
+
+  return input;
 }
 
 // Convert OpenAI response usage into the internal Usage shape.
@@ -166,68 +191,68 @@ function createMessage(
   };
 }
 
-• // Build an AssistantMessage for a failed request.
-  //
-  // We still return AssistantMessage instead of throwing here,
-  // so success and failure can go through the same stream/message pipeline.
-  function createErrorMessage(
-    // The model whose request failed.
-    model: Model<"openai-responses">,
+// Build an AssistantMessage for a failed request.
+//
+// We still return AssistantMessage instead of throwing here,
+// so success and failure can go through the same stream/message pipeline.
+function createErrorMessage(
+  // The model whose request failed.
+  model: Model<"openai-responses">,
 
-    // unknown because JavaScript can throw anything:
-    // Error, string, object, etc.
-    error: unknown,
-  ): AssistantMessage {
-    return {
-      // Object spread syntax.
-      //
-      // createMessage(model, "") creates a normal empty assistant message:
-      // {
-      //   role: "assistant",
-      //   content: [{ type: "text", text: "" }],
-      //   api: model.api,
-      //   provider: model.provider,
-      //   model: model.id,
-      //   usage: zeroUsage,
-      //   stopReason: "stop",
-      //   timestamp: ...
-      // }
-      //
-      // The leading ... copies all those fields into this new object.
-      ...createMessage(model, ""),
+  // unknown because JavaScript can throw anything:
+  // Error, string, object, etc.
+  error: unknown,
+): AssistantMessage {
+  return {
+    // Object spread syntax.
+    //
+    // createMessage(model, "") creates a normal empty assistant message:
+    // {
+    //   role: "assistant",
+    //   content: [{ type: "text", text: "" }],
+    //   api: model.api,
+    //   provider: model.provider,
+    //   model: model.id,
+    //   usage: zeroUsage,
+    //   stopReason: "stop",
+    //   timestamp: ...
+    // }
+    //
+    // The leading ... copies all those fields into this new object.
+    ...createMessage(model, ""),
 
-      // Fields written after the spread override copied fields.
-      // So this changes stopReason from "stop" to "error".
-      stopReason: "error",
+    // Fields written after the spread override copied fields.
+    // So this changes stopReason from "stop" to "error".
+    stopReason: "error",
 
-      // Normalize the thrown value into a readable string.
-      //
-      // If it is an Error object, use error.message.
-      // Otherwise convert it with String(error).
-      errorMessage: error instanceof Error ? error.message : String(error),
-    };
-  }
+    // Normalize the thrown value into a readable string.
+    //
+    // If it is an Error object, use error.message.
+    // Otherwise convert it with String(error).
+    errorMessage: error instanceof Error ? error.message : String(error),
+  };
+}
 
-  // Simple OpenAI Responses stream implementation.
-  // Returns immediately with an AssistantMessageEventStream;
-  // the async request below pushes start/done/error events into it.
+// Simple OpenAI Responses stream implementation.
+// Returns immediately with an AssistantMessageEventStream;
+// the async request below pushes start/done/error events into it.
 export const streamSimple: StreamFunction<
   "openai-responses",
   SimpleStreamOptions
 > = (model, context, options): AssistantMessageEventStream => {
-    // Create the event stream returned to the caller.
-    // The stream starts empty; events will be pushed by the async task below.
-   const stream = new AssistantMessageEventStream();
+  // Create the event stream returned to the caller.
+  // The stream starts empty; events will be pushed by the async task below.
+  const stream = new AssistantMessageEventStream();
 
-    // Start the actual request in the background.
-    //
-    // (async () => { ... })()
-    // means: define an async function and call it immediately.
-    //
-    // async functions return Promise.
-    // `void` means we intentionally do not await that Promise here,
-    // because this function must return the stream immediately.
-    //
+  // Start the actual request in the background.
+  //
+  // (async () => { ... })()
+  // means: define an async function and call it immediately.
+  //
+  // async functions return Promise.
+  // `void` means we intentionally do not await that Promise here,
+  // because this function must return the stream immediately.
+  //
   void (async () => {
     // return stream now, do network request later, push events into stream as work progresses
     try {
@@ -252,7 +277,7 @@ export const streamSimple: StreamFunction<
           },
           body: JSON.stringify({
             model: model.id,
-            input: promptFromContext(context),
+            input: inputFromContext(model, context),
           }),
         },
       );
