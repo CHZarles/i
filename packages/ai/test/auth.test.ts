@@ -16,6 +16,11 @@ const model: Model<"openai-responses"> = {
   maxTokens: 8192,
 };
 
+/*
+Auth belongs in provider/auth because it converts stored credentials or           
+env values into request-ready ModelAuth, so API adapters only receive             
+apiKey/headers/baseUrl and do not know where credentials came from.               
+*/
 test("envApiKeyAuth resolves an env key", async () => {
   // Concrete runtime objects
   const auth = envApiKeyAuth("OpenAI API key", ["OPENAI_API_KEY"]);
@@ -23,7 +28,6 @@ test("envApiKeyAuth resolves an env key", async () => {
   // Convert possible credential sources into request-ready auth.
   const result = await auth.resolve({
     model,
-    // if someone asks for OPENAI_API_KEY tnen return "env-key"
     ctx: {
       env: async (name) => (name === "OPENAI_API_KEY" ? "env-key" : undefined),
     },
