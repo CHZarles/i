@@ -1,4 +1,5 @@
 import { envApiKeyAuth } from "../src/auth/helpers.ts";
+import { openAIResponsesApi } from "../src/api/openai-responses.lazy.ts";
 import { createProvider } from "../src/models.ts";
 
 const provider = createProvider({
@@ -21,6 +22,7 @@ const provider = createProvider({
       maxTokens: 8192,
     },
   ],
+  api: openAIResponsesApi(),
 });
 
 console.log(provider.id);

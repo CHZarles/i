@@ -5,5 +5,9 @@
   "type": "module",
   "devDependencies": {
     "@types/node": "^26.1.0"
+  },
+  "scripts": {
+    "test": "node --test \"packages/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit"
   }
 }
