@@ -45,6 +45,13 @@ type OpenAITextStreamEvent =
           total_tokens?: number;
         };
       };
+    }
+  // OpenAI says: the response is failed
+  | {
+      type: "response.failed";
+      response?: {
+        error?: { code?: string; message?: string };
+      };
     };
 
 export async function processResponsesStream(
@@ -73,6 +80,15 @@ export async function processResponsesStream(
   let sawCompleted = false;
 
   for await (const event of openaiStream) {
+    if (event.type === "response.failed") {
+      const error = event.response?.error;
+
+      throw new Error(
+        error
+          ? `${error.code ?? "unknown"}: ${error.message ?? "no message"}`
+          : "Unknown error (no error details in response)",
+      );
+    }
     if (event.type === "response.output_item.added") {
       // Ignore non-text output items for now. Tool calls/thinking come later.
       if (event.item.type !== "message") continue;

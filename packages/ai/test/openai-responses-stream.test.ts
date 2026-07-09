@@ -70,3 +70,22 @@ test("processResponsesStream converts OpenAI text deltas into assistant text", a
   assert.equal(output.usage.totalTokens, 3);
   assert.equal(output.stopReason, "stop");
 });
+
+async function* failedEvents(): AsyncIterable<any> {
+  yield {
+    type: "response.failed",
+    response: {
+      error: { code: "server_error", message: "boom" },
+    },
+  };
+}
+
+test("processResponsesStream throws on OpenAI failed response", async () => {
+  const output = createOutput();
+  const stream = new AssistantMessageEventStream();
+
+  await assert.rejects(
+    processResponsesStream(failedEvents(), output, stream, model),
+    /server_error: boom/,
+  );
+});
