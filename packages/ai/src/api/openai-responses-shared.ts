@@ -1,4 +1,6 @@
 import type {
+  AssistantMessage,
+  AssistantMessageEventStream,
   // Conversation history passed into the model.
   Context,
   // Model metadata, including id/api/provider/baseUrl.
@@ -14,6 +16,113 @@ type ResponsesInputItem =
       content: { type: "output_text"; text: string; annotations: [] }[];
       status: "completed";
     };
+
+type OpenAITextStreamEvent =
+  // OpenAI says: a new output item started.
+  // For this first slice, we only care when the item is an assistant message.
+  | {
+      type: "response.output_item.added";
+      output_index: number;
+      item: { type: string }; // type will be message / function_call /  thinking ...
+    }
+  // OpenAI says: here is the next piece of text for one output item.
+  // Multiple delta events together become the final assistant text.
+  | {
+      type: "response.output_text.delta";
+      output_index: number;
+      delta: string;
+    }
+  // OpenAI says: the response is finished, and here is final metadata.
+  // This event gives us response id, stop state, and token usage.
+  | {
+      type: "response.completed";
+      response: {
+        id?: string;
+        status?: string;
+        usage?: {
+          input_tokens?: number;
+          output_tokens?: number;
+          total_tokens?: number;
+        };
+      };
+    };
+
+export async function processResponsesStream(
+  // The provider event source. In the test this is an async generator;
+  // later it can be real SSE/network events.
+  openaiStream: AsyncIterable<OpenAITextStreamEvent>,
+
+  // The single assistant message being built in-place.
+  // This function mutates output.content, output.usage, output.responseId.
+  output: AssistantMessage,
+
+  // The Pi event stream. This tiny slice does not push text_start/text_delta yet,
+  // but the argument is here because the full parser will emit progress events.
+  _stream: AssistantMessageEventStream,
+
+  // Model metadata is not needed in the first slice, but the full parser uses it
+  // for provider/model-specific details such as cost and compatibility.
+  _model: Model<"openai-responses">,
+): Promise<void> {
+  // OpenAI usually gives us one network stream, but that stream can contain
+  // multiple output items: text, tool calls, reasoning, etc.
+  // output_index routes each delta to the Pi content block it belongs to.
+  const textSlots = new Map<number, { type: "text"; text: string }>();
+
+  // A stream that ends without response.completed is incomplete/corrupt.
+  let sawCompleted = false;
+
+  for await (const event of openaiStream) {
+    if (event.type === "response.output_item.added") {
+      // Ignore non-text output items for now. Tool calls/thinking come later.
+      if (event.item.type !== "message") continue;
+
+      // Create the Pi text block that future delta events will append to.
+      const block = { type: "text" as const, text: "" };
+      output.content.push(block);
+
+      // Remember which OpenAI output_index owns this Pi text block.
+      textSlots.set(event.output_index, block);
+      continue;
+    }
+
+    if (event.type === "response.output_text.delta") {
+      // Find the text block created by response.output_item.added.
+      const block = textSlots.get(event.output_index);
+      if (!block) continue;
+
+      // Mutate the same object already stored inside output.content.
+      block.text += event.delta;
+      continue;
+    }
+
+    if (event.type === "response.completed") {
+      sawCompleted = true;
+
+      // Copy provider metadata into Pi's assistant message shape.
+      output.responseId = event.response.id;
+      output.stopReason = "stop";
+
+      // OpenAI names these fields input_tokens/output_tokens.
+      // Pi's internal Usage shape names them input/output.
+      const input = event.response.usage?.input_tokens ?? 0;
+      const outputTokens = event.response.usage?.output_tokens ?? 0;
+
+      output.usage = {
+        input,
+        output: outputTokens,
+        cacheRead: 0,
+        cacheWrite: 0,
+        totalTokens: event.response.usage?.total_tokens ?? input + outputTokens,
+        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
+      };
+    }
+  }
+
+  if (!sawCompleted) {
+    throw new Error("OpenAI Responses stream ended before completed event");
+  }
+}
 
 export function convertResponsesMessages(
   model: Model<"openai-responses">,
