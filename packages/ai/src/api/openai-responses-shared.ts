@@ -32,13 +32,17 @@ type OpenAIFunctionCallItem = {
   arguments?: string;
 };
 
+type OpenAIUnsupportedItem = {
+  type: "reasoning";
+};
+
 type OpenAITextStreamEvent =
   // OpenAI says: a new output item started.
   // For this first slice, we only care when the item is an assistant message.
   | {
       type: "response.output_item.added";
       output_index: number;
-      item: OpenAIMessageItem | OpenAIFunctionCallItem;
+      item: OpenAIMessageItem | OpenAIFunctionCallItem | OpenAIUnsupportedItem;
     }
   // OpenAI says: here is the next piece of text for one output item.
   // Multiple delta events together become the final assistant text.
@@ -77,7 +81,7 @@ type OpenAITextStreamEvent =
   | {
       type: "response.output_item.done";
       output_index: number;
-      item: OpenAIMessageItem | OpenAIFunctionCallItem;
+      item: OpenAIMessageItem | OpenAIFunctionCallItem | OpenAIUnsupportedItem;
     };
 
 /*
@@ -104,11 +108,13 @@ export async function processResponsesStream(
 
   // The single assistant message being built in-place.
   // This function mutates output.content, output.usage, output.responseId.
+  // 这个数据结构面向, the assistant message being built
   output: AssistantMessage,
 
   // The Pi event stream for live progress.
   // We mutate output and also push text_start/text_delta so upper layers can
   // render streaming text before the final assistant message is complete.
+  // 这个数据结构面向, the notification channel while it is being built
   stream: AssistantMessageEventStream,
 
   // Model metadata is not needed in the first slice, but the full parser uses it
@@ -118,6 +124,9 @@ export async function processResponsesStream(
   // OpenAI usually gives us one network stream, but that stream can contain
   // multiple output items: text, tool calls, reasoning, etc.
   // output_index routes each delta to the Pi content block it belongs to.
+  // 普通 chat 通常只有一个 text output，但 Responses 协议用 output_index
+  // 标记每个 output item。event.type 只告诉我们这是 text delta；
+  // output_index 才告诉我们要更新哪一个 text block。
   const textSlots = new Map<
     number,
     { block: { type: "text"; text: string }; contentIndex: number }
@@ -154,8 +163,12 @@ export async function processResponsesStream(
           contentIndex: output.content.length - 1,
           partialJson: event.item.arguments ?? "",
         });
+
         continue;
       }
+
+      // Thinking/reasoning items are not supported in this slice yet.
+      if (event.item.type !== "message") continue;
 
       const block = { type: "text" as const, text: "" };
       output.content.push(block);
@@ -194,6 +207,10 @@ export async function processResponsesStream(
       if (!slot) continue;
 
       slot.partialJson += event.delta;
+
+      // 当前 slice 只把最终 ToolCall 存进 output.content。
+      // 这里暂时不向 stream 推送 toolcall_start/toolcall_delta/toolcall_end；
+      // 完整 Pi 会在下一步把 tool call 的流式进度也通知给上层。
       continue;
     }
 
@@ -231,6 +248,9 @@ export async function processResponsesStream(
         toolCallSlots.delete(event.output_index);
         continue;
       }
+
+      // Thinking/reasoning items are not supported in this slice yet.
+      if (event.item.type !== "message") continue;
 
       const slot = textSlots.get(event.output_index);
       if (!slot) continue;
