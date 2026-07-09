@@ -207,6 +207,19 @@ export type AssistantMessageEvent =
       contentIndex: number;
       content: string;
       partial: AssistantMessage;
+    }
+  | { type: "toolcall_start"; contentIndex: number; partial: AssistantMessage }
+  | {
+      type: "toolcall_delta";
+      contentIndex: number;
+      delta: string;
+      partial: AssistantMessage;
+    }
+  | {
+      type: "toolcall_end";
+      contentIndex: number;
+      toolCall: ToolCall;
+      partial: AssistantMessage;
     };
 
 // 先去看 event-stream.ts 再回来看下面的👇

@@ -163,7 +163,11 @@ export async function processResponsesStream(
           contentIndex: output.content.length - 1,
           partialJson: event.item.arguments ?? "",
         });
-
+        stream.push({
+          type: "toolcall_start",
+          contentIndex: output.content.length - 1,
+          partial: output,
+        });
         continue;
       }
 
@@ -208,9 +212,12 @@ export async function processResponsesStream(
 
       slot.partialJson += event.delta;
 
-      // 当前 slice 只把最终 ToolCall 存进 output.content。
-      // 这里暂时不向 stream 推送 toolcall_start/toolcall_delta/toolcall_end；
-      // 完整 Pi 会在下一步把 tool call 的流式进度也通知给上层。
+      stream.push({
+        type: "toolcall_delta",
+        contentIndex: slot.contentIndex,
+        delta: event.delta,
+        partial: output,
+      });
       continue;
     }
 
@@ -246,6 +253,12 @@ export async function processResponsesStream(
         ) as Record<string, unknown>;
 
         toolCallSlots.delete(event.output_index);
+        stream.push({
+          type: "toolcall_end",
+          contentIndex: slot.contentIndex,
+          toolCall: slot.block,
+          partial: output,
+        });
         continue;
       }
 

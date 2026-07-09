@@ -183,3 +183,27 @@ test("processResponsesStream converts OpenAI function call into toolCall block",
     },
   ]);
 });
+
+test("processResponsesStream emits tool call progress events", async () => {
+  const output = createOutput();
+  const stream = new AssistantMessageEventStream();
+  const seen: string[] = [];
+
+  const reader = (async () => {
+    for await (const event of stream) {
+      seen.push(event.type);
+    }
+  })();
+
+  await processResponsesStream(toolCallEvents(), output, stream, model);
+
+  stream.end(output);
+  await reader;
+
+  assert.deepEqual(seen, [
+    "toolcall_start",
+    "toolcall_delta",
+    "toolcall_delta",
+    "toolcall_end",
+  ]);
+});
