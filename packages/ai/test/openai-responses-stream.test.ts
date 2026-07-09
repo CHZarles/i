@@ -46,7 +46,14 @@ async function* events(): AsyncIterable<any> {
 
   yield { type: "response.output_text.delta", output_index: 0, delta: "Hel" };
   yield { type: "response.output_text.delta", output_index: 0, delta: "lo" };
-
+  yield {
+    type: "response.output_item.done",
+    output_index: 0,
+    item: {
+      type: "message",
+      content: [{ type: "output_text", text: "Hello" }],
+    },
+  };
   yield {
     type: "response.completed",
     response: {
@@ -110,5 +117,10 @@ test("processResponsesStream emits text progress events", async () => {
   stream.end(output);
   await reader;
 
-  assert.deepEqual(seen, ["text_start", "text_delta", "text_delta"]);
+  assert.deepEqual(seen, [
+    "text_start",
+    "text_delta",
+    "text_delta",
+    "text_end",
+  ]);
 });

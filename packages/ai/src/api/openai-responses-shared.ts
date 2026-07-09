@@ -52,7 +52,33 @@ type OpenAITextStreamEvent =
       response?: {
         error?: { code?: string; message?: string };
       };
+    }
+  | {
+      type: "response.output_item.done";
+      output_index: number;
+      item: {
+        type: string;
+        content?: { type: string; text?: string }[];
+      };
     };
+
+/*
+  response.output_item.done = one output block is finished
+  response.completed        = whole model response is finished
+
+  Concrete example:
+
+  One assistant response
+    ├─ output item 0: text message
+    ├─ output item 1: tool call
+    └─ final response metadata
+
+  OpenAI may send:
+
+  response.output_item.done   // text block finished
+  response.output_item.done   // tool call block finished
+  response.completed          // whole response finished
+*/
 
 export async function processResponsesStream(
   // The provider event source. In the test this is an async generator;
@@ -154,6 +180,27 @@ export async function processResponsesStream(
         totalTokens: event.response.usage?.total_tokens ?? input + outputTokens,
         cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
       };
+    }
+
+    if (event.type === "response.output_item.done") {
+      const slot = textSlots.get(event.output_index);
+      if (!slot || event.item.type !== "message") continue;
+
+      slot.block.text =
+        event.item.content
+          ?.filter((part) => part.type === "output_text")
+          .map((part) => part.text ?? "")
+          .join("") ?? slot.block.text;
+
+      stream.push({
+        type: "text_end",
+        contentIndex: slot.contentIndex,
+        content: slot.block.text,
+        partial: output,
+      });
+
+      textSlots.delete(event.output_index);
+      continue;
     }
   }
 

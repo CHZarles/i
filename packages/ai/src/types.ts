@@ -193,6 +193,13 @@ export type AssistantMessageEvent =
       contentIndex: number;
       delta: string;
       partial: AssistantMessage;
+    }
+  | {
+      // 文本 block 已经结束；content 是这个 block 的最终完整文本。
+      type: "text_end";
+      contentIndex: number;
+      content: string;
+      partial: AssistantMessage;
     };
 
 // 先去看 event-stream.ts 再回来看下面的👇
