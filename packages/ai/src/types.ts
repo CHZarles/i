@@ -105,7 +105,7 @@ export interface Usage {
   };
 }
 
-export type StopReason = "stop" | "error";
+export type StopReason = "stop" | "toolUse" | "error";
 
 // UserMessage , AssistantMessage, Message , Context, 构成"对话历史”的核心数据结构
 
@@ -150,7 +150,7 @@ export interface AssistantMessage {
   usage: Usage;
 
   // 停止原因。
-  // 当前只有 "stop" | "error"。
+  // "toolUse" means the assistant stopped because it wants the agent to run a tool.
   stopReason: StopReason;
 
   // 错误信息。只有 stopReason 为 "error" 时通常才有。
@@ -190,7 +190,7 @@ export interface ToolCall {
 // 用来让 UI/terminal 在最终 done 之前先显示增量文本。
 export type AssistantMessageEvent =
   | { type: "start"; partial: AssistantMessage }
-  | { type: "done"; reason: "stop"; message: AssistantMessage }
+  | { type: "done"; reason: "stop" | "toolUse"; message: AssistantMessage }
   | { type: "error"; reason: "error"; error: AssistantMessage }
   // 一个新的文本 content block 开始了。contentIndex 指向 partial.content。
   | { type: "text_start"; contentIndex: number; partial: AssistantMessage }

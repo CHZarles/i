@@ -182,6 +182,7 @@ test("processResponsesStream converts OpenAI function call into toolCall block",
       arguments: { city: "SF" },
     },
   ]);
+  assert.equal(output.stopReason, "toolUse");
 });
 
 test("processResponsesStream emits tool call progress events", async () => {

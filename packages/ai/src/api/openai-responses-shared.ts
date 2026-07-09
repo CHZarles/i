@@ -226,7 +226,9 @@ export async function processResponsesStream(
 
       // Copy provider metadata into Pi's assistant message shape.
       output.responseId = event.response.id;
-      output.stopReason = "stop";
+      output.stopReason = output.content.some((block) => block.type === "toolCall")
+        ? "toolUse"
+        : "stop";
 
       // OpenAI names these fields input_tokens/output_tokens.
       // Pi's internal Usage shape names them input/output.
