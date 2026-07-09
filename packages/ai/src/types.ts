@@ -176,17 +176,24 @@ export interface Context {
 }
 
 // 这是 assistant 流式调用的事件协议
-// 可辨识联合类型，表示 AssistantMessageEvent 只能是三种形态之一。
+// 可辨识联合类型：每个事件都有 type，调用方用 event.type 区分形态。
 //
-//  每种形态都有一个 type 字段：
-//   type: "start"
-//   type: "done"
-//   type: "error"
-// 代码里可以通过 event.type 判断具体是哪一种。
+// start/done/error 是整条 assistant 回复的生命周期事件。
+// text_start/text_delta 是回复生成过程中的局部进度事件，
+// 用来让 UI/terminal 在最终 done 之前先显示增量文本。
 export type AssistantMessageEvent =
   | { type: "start"; partial: AssistantMessage }
   | { type: "done"; reason: "stop"; message: AssistantMessage }
-  | { type: "error"; reason: "error"; error: AssistantMessage };
+  | { type: "error"; reason: "error"; error: AssistantMessage }
+  // 一个新的文本 content block 开始了。contentIndex 指向 partial.content。
+  | { type: "text_start"; contentIndex: number; partial: AssistantMessage }
+  | {
+      // 一段新文本到达了；delta 是本次新增片段，不是完整文本。
+      type: "text_delta";
+      contentIndex: number;
+      delta: string;
+      partial: AssistantMessage;
+    };
 
 // 先去看 event-stream.ts 再回来看下面的👇
 

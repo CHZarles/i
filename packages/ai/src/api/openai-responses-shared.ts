@@ -63,9 +63,10 @@ export async function processResponsesStream(
   // This function mutates output.content, output.usage, output.responseId.
   output: AssistantMessage,
 
-  // The Pi event stream. This tiny slice does not push text_start/text_delta yet,
-  // but the argument is here because the full parser will emit progress events.
-  _stream: AssistantMessageEventStream,
+  // The Pi event stream for live progress.
+  // We mutate output and also push text_start/text_delta so upper layers can
+  // render streaming text before the final assistant message is complete.
+  stream: AssistantMessageEventStream,
 
   // Model metadata is not needed in the first slice, but the full parser uses it
   // for provider/model-specific details such as cost and compatibility.
@@ -74,7 +75,10 @@ export async function processResponsesStream(
   // OpenAI usually gives us one network stream, but that stream can contain
   // multiple output items: text, tool calls, reasoning, etc.
   // output_index routes each delta to the Pi content block it belongs to.
-  const textSlots = new Map<number, { type: "text"; text: string }>();
+  const textSlots = new Map<
+    number,
+    { block: { type: "text"; text: string }; contentIndex: number }
+  >();
 
   // A stream that ends without response.completed is incomplete/corrupt.
   let sawCompleted = false;
@@ -96,19 +100,37 @@ export async function processResponsesStream(
       // Create the Pi text block that future delta events will append to.
       const block = { type: "text" as const, text: "" };
       output.content.push(block);
+      const contentIndex = output.content.length - 1;
 
-      // Remember which OpenAI output_index owns this Pi text block.
-      textSlots.set(event.output_index, block);
+      // Remember which OpenAI output_index owns this Pi text block and where it
+      // lives in output.content, so later deltas report the same contentIndex.
+      textSlots.set(event.output_index, { block, contentIndex });
+
+      // Tell consumers that a new text block exists in output.content.
+      stream.push({
+        type: "text_start",
+        contentIndex,
+        partial: output,
+      });
       continue;
     }
 
     if (event.type === "response.output_text.delta") {
       // Find the text block created by response.output_item.added.
-      const block = textSlots.get(event.output_index);
-      if (!block) continue;
+      const slot = textSlots.get(event.output_index);
+      if (!slot) continue;
 
       // Mutate the same object already stored inside output.content.
-      block.text += event.delta;
+      slot.block.text += event.delta;
+
+      // Tell consumers about only the new text piece.
+      // Use the contentIndex created with the block, not a hardcoded position.
+      stream.push({
+        type: "text_delta",
+        contentIndex: slot.contentIndex,
+        delta: event.delta,
+        partial: output,
+      });
       continue;
     }
 

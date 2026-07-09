@@ -89,3 +89,26 @@ test("processResponsesStream throws on OpenAI failed response", async () => {
     /server_error: boom/,
   );
 });
+
+test("processResponsesStream emits text progress events", async () => {
+  const output = createOutput();
+  const stream = new AssistantMessageEventStream();
+  const seen: string[] = [];
+
+  // Start a consumer before parsing.
+  // It observes live progress events pushed by processResponsesStream.
+  const reader = (async () => {
+    for await (const event of stream) {
+      seen.push(event.type);
+    }
+  })();
+
+  await processResponsesStream(events(), output, stream, model);
+
+  // processResponsesStream handles provider events only.
+  // The wrapper later owns done/error; the test ends the stream manually.
+  stream.end(output);
+  await reader;
+
+  assert.deepEqual(seen, ["text_start", "text_delta", "text_delta"]);
+});
