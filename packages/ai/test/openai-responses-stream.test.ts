@@ -124,3 +124,62 @@ test("processResponsesStream emits text progress events", async () => {
     "text_end",
   ]);
 });
+
+async function* toolCallEvents(): AsyncIterable<any> {
+  yield {
+    type: "response.output_item.added",
+    output_index: 0,
+    item: {
+      type: "function_call",
+      id: "fc_1",
+      call_id: "call_1",
+      name: "get_weather",
+      arguments: "",
+    },
+  };
+
+  yield {
+    type: "response.function_call_arguments.delta",
+    output_index: 0,
+    delta: '{"city"',
+  };
+
+  yield {
+    type: "response.function_call_arguments.delta",
+    output_index: 0,
+    delta: ':"SF"}',
+  };
+
+  yield {
+    type: "response.output_item.done",
+    output_index: 0,
+    item: {
+      type: "function_call",
+      id: "fc_1",
+      call_id: "call_1",
+      name: "get_weather",
+      arguments: '{"city":"SF"}',
+    },
+  };
+
+  yield {
+    type: "response.completed",
+    response: { id: "resp_tool", status: "completed" },
+  };
+}
+
+test("processResponsesStream converts OpenAI function call into toolCall block", async () => {
+  const output = createOutput();
+  const stream = new AssistantMessageEventStream();
+
+  await processResponsesStream(toolCallEvents(), output, stream, model);
+
+  assert.deepEqual(output.content, [
+    {
+      type: "toolCall",
+      id: "call_1|fc_1",
+      name: "get_weather",
+      arguments: { city: "SF" },
+    },
+  ]);
+});

@@ -1,5 +1,6 @@
 import { config } from "dotenv";
 import { openaiProvider } from "../src/providers/openai.ts";
+import type { TextContent } from "../src/types.ts";
 
 config({ override: true });
 
@@ -17,7 +18,8 @@ async function main() {
     .streamSimple(
       requestModel,
       {
-        systemPrompt: "You are a precise memory test. Reply with only the requested token.",
+        systemPrompt:
+          "You are a precise memory test. Reply with only the requested token.",
         messages: [
           {
             role: "user",
@@ -36,7 +38,13 @@ async function main() {
               cacheRead: 0,
               cacheWrite: 0,
               totalTokens: 0,
-              cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
+              cost: {
+                input: 0,
+                output: 0,
+                cacheRead: 0,
+                cacheWrite: 0,
+                total: 0,
+              },
             },
             stopReason: "stop",
             timestamp: Date.now(),
@@ -57,7 +65,10 @@ async function main() {
 
   if (message.stopReason !== "stop") throw new Error(message.errorMessage);
 
-  const text = message.content.map((part) => part.text).join("");
+  const text = message.content
+    .filter((block): block is TextContent => block.type === "text")
+    .map((block) => block.text)
+    .join("");
   if (!text.includes("ctx-charles-7319")) {
     throw new Error(`Expected model to use conversation history, got: ${text}`);
   }

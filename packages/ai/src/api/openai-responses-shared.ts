@@ -5,6 +5,8 @@ import type {
   Context,
   // Model metadata, including id/api/provider/baseUrl.
   Model,
+  ToolCall,
+  TextContent,
 } from "../types.ts";
 
 type ResponsesInputItem =
@@ -17,18 +19,37 @@ type ResponsesInputItem =
       status: "completed";
     };
 
+type OpenAIMessageItem = {
+  type: "message";
+  content?: { type: string; text?: string }[];
+};
+
+type OpenAIFunctionCallItem = {
+  type: "function_call";
+  id: string;
+  call_id: string;
+  name: string;
+  arguments?: string;
+};
+
 type OpenAITextStreamEvent =
   // OpenAI says: a new output item started.
   // For this first slice, we only care when the item is an assistant message.
   | {
       type: "response.output_item.added";
       output_index: number;
-      item: { type: string }; // type will be message / function_call /  thinking ...
+      item: OpenAIMessageItem | OpenAIFunctionCallItem;
     }
   // OpenAI says: here is the next piece of text for one output item.
   // Multiple delta events together become the final assistant text.
   | {
       type: "response.output_text.delta";
+      output_index: number;
+      delta: string;
+    }
+  // tool related
+  | {
+      type: "response.function_call_arguments.delta";
       output_index: number;
       delta: string;
     }
@@ -56,17 +77,13 @@ type OpenAITextStreamEvent =
   | {
       type: "response.output_item.done";
       output_index: number;
-      item: {
-        type: string;
-        content?: { type: string; text?: string }[];
-      };
+      item: OpenAIMessageItem | OpenAIFunctionCallItem;
     };
 
 /*
   response.output_item.done = one output block is finished
   response.completed        = whole model response is finished
 
-  Concrete example:
 
   One assistant response
     ├─ output item 0: text message
@@ -105,7 +122,10 @@ export async function processResponsesStream(
     number,
     { block: { type: "text"; text: string }; contentIndex: number }
   >();
-
+  const toolCallSlots = new Map<
+    number,
+    { block: ToolCall; contentIndex: number; partialJson: string }
+  >();
   // A stream that ends without response.completed is incomplete/corrupt.
   let sawCompleted = false;
 
@@ -120,19 +140,29 @@ export async function processResponsesStream(
       );
     }
     if (event.type === "response.output_item.added") {
-      // Ignore non-text output items for now. Tool calls/thinking come later.
-      if (event.item.type !== "message") continue;
+      if (event.item.type === "function_call") {
+        const block: ToolCall = {
+          type: "toolCall",
+          id: `${event.item.call_id}|${event.item.id}`,
+          name: event.item.name,
+          arguments: {},
+        };
 
-      // Create the Pi text block that future delta events will append to.
+        output.content.push(block);
+        toolCallSlots.set(event.output_index, {
+          block,
+          contentIndex: output.content.length - 1,
+          partialJson: event.item.arguments ?? "",
+        });
+        continue;
+      }
+
       const block = { type: "text" as const, text: "" };
       output.content.push(block);
       const contentIndex = output.content.length - 1;
 
-      // Remember which OpenAI output_index owns this Pi text block and where it
-      // lives in output.content, so later deltas report the same contentIndex.
       textSlots.set(event.output_index, { block, contentIndex });
 
-      // Tell consumers that a new text block exists in output.content.
       stream.push({
         type: "text_start",
         contentIndex,
@@ -140,7 +170,6 @@ export async function processResponsesStream(
       });
       continue;
     }
-
     if (event.type === "response.output_text.delta") {
       // Find the text block created by response.output_item.added.
       const slot = textSlots.get(event.output_index);
@@ -157,6 +186,14 @@ export async function processResponsesStream(
         delta: event.delta,
         partial: output,
       });
+      continue;
+    }
+
+    if (event.type === "response.function_call_arguments.delta") {
+      const slot = toolCallSlots.get(event.output_index);
+      if (!slot) continue;
+
+      slot.partialJson += event.delta;
       continue;
     }
 
@@ -183,8 +220,20 @@ export async function processResponsesStream(
     }
 
     if (event.type === "response.output_item.done") {
+      if (event.item.type === "function_call") {
+        const slot = toolCallSlots.get(event.output_index);
+        if (!slot) continue;
+
+        slot.block.arguments = JSON.parse(
+          event.item.arguments || slot.partialJson || "{}",
+        ) as Record<string, unknown>;
+
+        toolCallSlots.delete(event.output_index);
+        continue;
+      }
+
       const slot = textSlots.get(event.output_index);
-      if (!slot || event.item.type !== "message") continue;
+      if (!slot) continue;
 
       slot.block.text =
         event.item.content
@@ -200,6 +249,7 @@ export async function processResponsesStream(
       });
 
       textSlots.delete(event.output_index);
+
       continue;
     }
   }
@@ -231,7 +281,10 @@ export function convertResponsesMessages(
       continue;
     }
 
-    const text = message.content.map((block) => block.text).join("");
+    const text = message.content
+      .filter((block): block is TextContent => block.type === "text")
+      .map((block) => block.text)
+      .join("");
     if (!text) continue;
 
     input.push({

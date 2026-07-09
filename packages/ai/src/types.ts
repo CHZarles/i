@@ -132,7 +132,7 @@ export interface AssistantMessage {
   // assistant 输出内容。
   // 用数组是为了以后支持多段文本、thinking、toolCall 等内容块。
   // 当前项目里只有 TextContent[]。
-  content: TextContent[];
+  content: (TextContent | ToolCall)[];
 
   // 这条回复是通过哪种 API 协议产生的。
   // 例如 "openai-responses"。
@@ -173,6 +173,13 @@ export type Message = UserMessage | AssistantMessage;
 export interface Context {
   systemPrompt?: string;
   messages: Message[];
+}
+
+export interface ToolCall {
+  type: "toolCall";
+  id: string;
+  name: string;
+  arguments: Record<string, unknown>;
 }
 
 // 这是 assistant 流式调用的事件协议
