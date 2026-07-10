@@ -14,7 +14,10 @@ import type {
   Usage,
 } from "../types.ts";
 
-import { convertResponsesMessages } from "./openai-responses-shared.ts";
+import {
+  convertResponsesMessages,
+  processResponsesStream,
+} from "./openai-responses-shared.ts";
 
 // Runtime import, because this class is instantiated with `new`.
 import { AssistantMessageEventStream } from "../utils/event-stream.ts";
@@ -187,6 +190,35 @@ function createErrorMessage(
   };
 }
 
+// fetch() 返回 HTTP Response，不是 OpenAI event。
+// `stream: true` 只把响应 body 变成 SSE 文本，例如：
+//   data: {"type":"response.output_text.delta","delta":"Hel"}
+// 这个 helper 把 SSE 文本转成 processResponsesStream 能消费的 event 对象。
+async function* parseResponsesSse(response: Response): AsyncGenerator<any> {
+  if (!response.body) throw new Error("Missing response body");
+
+  // 简化实现：await response.text() 等到 body 结束后一次性拿完整文本。
+  // 例子：body 文本可能长这样：
+  //   data: {"type":"response.output_text.delta","delta":"Hel"}\n\n
+  //   data: {"type":"response.output_text.delta","delta":"lo"}\n\n
+  // text.split("\n\n") 会得到两个 frame；下面的 yield 会依次吐出两个 event 对象。
+  // 生产级实现会用 response.body.getReader() 边收到 chunk 边解析。
+  const text = await response.text();
+
+  // SSE 用空行分隔 event；OpenAI 的 JSON payload 在 data 行里。
+  for (const frame of text.split("\n\n")) {
+    const line = frame.split("\n").find((line) => line.startsWith("data:"));
+
+    if (!line) continue;
+
+    // 去掉 SSE 的 "data:" 前缀，剩下的就是一个 provider event 的 JSON。
+    const data = line.slice("data:".length).trim();
+    if (!data || data === "[DONE]") continue;
+
+    yield JSON.parse(data);
+  }
+}
+
 // Simple OpenAI Responses stream implementation.
 // Returns immediately with an AssistantMessageEventStream;
 // the async request below pushes start/done/error events into it.
@@ -232,17 +264,36 @@ export const streamSimple: StreamFunction<
           body: JSON.stringify({
             model: model.id,
             input: convertResponsesMessages(model, context),
+            // 要求 OpenAI 返回 SSE frame，而不是一个最终 JSON 对象。
+            // 注意：fetch 的返回值仍然是 Response，不是 event iterator。
+            stream: true,
           }),
         },
       );
 
       if (!res.ok) throw new Error(await res.text());
 
-      const data = (await res.json()) as OpenAIResponsesResponse;
-      const message = createMessage(model, outputText(data), data);
+      const output = createMessage(model, "");
+      output.content = [];
 
-      stream.push({ type: "done", reason: "stop", message });
-      stream.end(message);
+      // Adapter 边界：
+      //   parseResponsesSse(res)      -> "data: {...}" 文本变成 provider event
+      //   processResponsesStream(...) -> provider event 更新 output 和 Pi stream
+      await processResponsesStream(
+        parseResponsesSse(res),
+        output,
+        stream,
+        model,
+      );
+
+      if (output.stopReason === "error") {
+        throw new Error(
+          output.errorMessage ?? "OpenAI Responses stream failed",
+        );
+      }
+
+      stream.push({ type: "done", reason: output.stopReason, message: output });
+      stream.end();
     } catch (error) {
       const message = createErrorMessage(model, error);
       stream.push({ type: "error", reason: "error", error: message });

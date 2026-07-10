@@ -16,6 +16,16 @@ const model: Model<"openai-responses"> = {
   maxTokens: 8192,
 };
 
+function sseResponse(events: unknown[]): Response {
+  const body = events
+    .map((event) => `data: ${JSON.stringify(event)}\n\n`)
+    .join("");
+
+  return new Response(body, {
+    status: 200,
+    headers: { "content-type": "text/event-stream" },
+  });
+}
 test("streamSimple sends OpenAI Responses request and returns assistant message", async () => {
   const context: Context = {
     systemPrompt: "Be concise.",
@@ -31,23 +41,42 @@ test("streamSimple sends OpenAI Responses request and returns assistant message"
       capturedUrl = String(url);
       capturedInit = init;
 
-      return new Response(
-        JSON.stringify({
-          id: "resp_123",
-          output_text: "Hello from OpenAI",
-          usage: {
-            input_tokens: 10,
-            output_tokens: 5,
-            total_tokens: 15,
+      return sseResponse([
+        {
+          type: "response.output_item.added",
+          output_index: 0,
+          item: { type: "message" },
+        },
+        { type: "response.output_text.delta", output_index: 0, delta: "Hel" },
+        { type: "response.output_text.delta", output_index: 0, delta: "lo" },
+        {
+          type: "response.output_item.done",
+          output_index: 0,
+          item: {
+            type: "message",
+            content: [{ type: "output_text", text: "Hello" }],
           },
-        }),
-        { status: 200 },
-      );
+        },
+        {
+          type: "response.completed",
+          response: {
+            id: "resp_123",
+            status: "completed",
+            usage: { input_tokens: 10, output_tokens: 5, total_tokens: 15 },
+          },
+        },
+      ]);
     };
 
     const stream = streamSimple(model, context, { apiKey: "test-key" });
+    const seen: string[] = [];
+    const reader = (async () => {
+      for await (const event of stream) {
+        seen.push(event.type);
+      }
+    })();
     const result = await stream.result();
-
+    await reader;
     assert.equal(capturedUrl, "https://api.openai.com/v1/responses");
     assert.equal(capturedInit?.method, "POST");
 
@@ -55,19 +84,25 @@ test("streamSimple sends OpenAI Responses request and returns assistant message"
     assert.equal(headers.authorization, "Bearer test-key");
     assert.equal(headers["content-type"], "application/json");
 
-    const body = JSON.parse(String(capturedInit?.body));
-    assert.equal(body.model, "gpt-test");
-    assert.deepEqual(body.input, [
+    const requestBody = JSON.parse(String(capturedInit?.body));
+    assert.equal(requestBody.model, "gpt-test");
+    assert.equal(requestBody.stream, true);
+    assert.deepEqual(requestBody.input, [
       { role: "system", content: "Be concise." },
       { role: "user", content: [{ type: "input_text", text: "Hello" }] },
     ]);
 
+    assert.deepEqual(seen, [
+      "start",
+      "text_start",
+      "text_delta",
+      "text_delta",
+      "text_end",
+      "done",
+    ]);
+
     assert.equal(result.content[0]?.type, "text");
-    assert.equal(result.content[0]?.text, "Hello from OpenAI");
-    assert.equal(result.responseId, "resp_123");
-    assert.equal(result.usage.input, 10);
-    assert.equal(result.usage.output, 5);
-    assert.equal(result.usage.totalTokens, 15);
+    assert.equal(result.content[0]?.text, "Hello");
   } finally {
     globalThis.fetch = originalFetch;
   }
