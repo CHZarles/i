@@ -36,6 +36,132 @@ type AnthropicMessagesResponse = {
   };
 };
 
+// 一个已经完成分帧的 SSE 传输帧，是交给下一层使用的稳定快照。
+// 它和 SseDecoderState 保存的是同一类信息，但生命周期不同：
+// ServerSentEvent 已经完成，`data` 已从多行 string[] 合并成一个 string，
+// 返回后不会再因为解码器开始处理下一帧而被清空。
+// `data` 仍然是 JSON 字符串，后续才会通过 JSON.parse 转成普通对象，
+// 并由 SDK 的 RawMessageStreamEvent 类型检查 Anthropic 事件结构。
+export interface ServerSentEvent {
+  event: string | null;
+  data: string;
+  raw: string[];
+}
+
+// 当前 SSE 帧的“临时记事本”，由解码器持有并不断修改。
+// 它表示尚未完成的帧，因此 `data` 是 string[]，用来逐行收集内容；
+// 读到空行后，这些内容会生成 ServerSentEvent，然后 state 会被清空复用。
+//
+//   event: message_start  -> state.event
+//   data: {"type": ...}   -> state.data
+//   原始的两行文本        -> state.raw
+//
+// 只有读到空行后，这些临时数据才会组成一个完整的 ServerSentEvent。
+export interface SseDecoderState {
+  event: string | null;
+  data: string[];
+  raw: string[];
+}
+
+// 在读到空行时结束当前帧：
+//
+//   未完成的 SseDecoderState
+//            |
+//            v
+//      flushSseEvent()
+//       |            |
+//       v            v
+//   返回完整帧     清空 state，准备接收下一帧
+//
+// 返回值使用当前数据的快照，清空 state 不会破坏已经返回的帧。
+function flushSseEvent(state: SseDecoderState): ServerSentEvent | null {
+  // state 中没有 event 和 data，说明这只是空内容，不生成事件。
+  if (!state.event && state.data.length === 0) {
+    return null;
+  }
+
+  // 把可变的“未完成状态”转换为独立的“已完成帧”：
+  // state.data: string[] -> event.data: string。
+  // 同时复制 raw 数组，后面清空 state 时不会影响返回的 event。
+  const event: ServerSentEvent = {
+    event: state.event,
+    data: state.data.join("\n"),
+    raw: [...state.raw],
+  };
+
+  // 当前帧已经完成，重置临时状态，下一条 SSE 帧将从空状态开始。
+  state.event = null;
+  state.data = [];
+  state.raw = [];
+
+  return event;
+}
+
+// 服务端的一帧 SSE 文本：
+//
+//   event: message_start
+//   data: {"type":"message_start"}
+//   <空行>
+//
+// 上面的三行会分别调用三次 decodeSseLine：
+//
+//   第 1 次：保存 event，帧还没结束，所以返回 null
+//   第 2 次：保存 data， 帧还没结束，所以返回 null
+//   第 3 次：读到空行，说明帧结束，返回完整的 ServerSentEvent
+//
+//   网络行 -> decodeSseLine -> 暂存到 state
+//                              |
+//                           遇到空行
+//                              |
+//                              v
+//                    返回完整帧并清空 state
+export function decodeSseLine(
+  line: string,
+  state: SseDecoderState,
+): ServerSentEvent | null {
+  // SSE 协议用空行表示当前帧结束。
+  if (line === "") {
+    return flushSseEvent(state);
+  }
+
+  // 保存服务端返回的原始行
+  // 后续解析失败时可以输出更有用的诊断信息。
+  state.raw.push(line);
+
+  // 以 ':' 开头的是 SSE 注释或用于保持连接的心跳行
+  // 不包含业务数据。
+  if (line.startsWith(":")) {
+    return null;
+  }
+
+  // 找到第一个冒号，它负责分隔 SSE 字段名和值。
+  // 例如 `data: {"type":"message_start"}` 中的索引是 4。
+  const delimiterIndex = line.indexOf(":");
+
+  // 有冒号时取冒号前面的字段名，例如 `data` 或 `event`；
+  // 没有冒号时，整行都被视为字段名。
+  const fieldName =
+    delimiterIndex === -1 ? line : line.slice(0, delimiterIndex);
+
+  // 有冒号时取冒号后面的全部内容；只使用第一个冒号，
+  // 所以 JSON 字符串内部的其他冒号不会被破坏。
+  let value = delimiterIndex === -1 ? "" : line.slice(delimiterIndex + 1);
+
+  // SSE 允许冒号后带一个可选空格，这个空格不属于真正的字段值。
+  if (value.startsWith(" ")) {
+    value = value.slice(1);
+  }
+
+  // Anthropic 使用 `event:` 指定事件名，
+  // 使用一个或多个 `data:` 行传输事件的 JSON 字符串。
+  if (fieldName === "event") {
+    state.event = value;
+  } else if (fieldName === "data") {
+    state.data.push(value);
+  }
+
+  return null;
+}
 function promptFromContext(context: Context): string {
   const lastUser = [...context.messages]
     .reverse()
