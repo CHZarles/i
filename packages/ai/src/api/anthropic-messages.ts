@@ -1,6 +1,7 @@
 import type {
   AssistantMessage,
   Context,
+  Message,
   Model,
   SimpleStreamOptions,
   StreamFunction,
@@ -8,6 +9,11 @@ import type {
   Usage,
 } from "../types.ts";
 import { AssistantMessageEventStream } from "../utils/event-stream.ts";
+
+import type {
+  MessageCreateParamsStreaming,
+  MessageParam,
+} from "@anthropic-ai/sdk/resources/messages.js";
 
 type AnthropicMessagesConfig = {
   apiKey: string;
@@ -35,6 +41,64 @@ function promptFromContext(context: Context): string {
     .reverse()
     .find((message) => message.role === "user");
   return lastUser?.content ?? "";
+}
+
+export function convertMessages(messages: Message[]): MessageParam[] {
+  const params: MessageParam[] = [];
+
+  for (const message of messages) {
+    if (message.role === "user") {
+      params.push({
+        role: "user",
+        content: message.content,
+      });
+      continue;
+    }
+
+    const content: { type: "text"; text: string }[] = [];
+
+    for (const block of message.content) {
+      if (block.type === "text") {
+        content.push({
+          type: "text",
+          text: block.text,
+        });
+      }
+    }
+
+    if (content.length > 0) {
+      params.push({
+        role: "assistant",
+        content,
+      });
+    }
+  }
+
+  return params;
+}
+
+export function buildParams(
+  model: Model<"anthropic-messages">,
+  context: Context,
+  options?: AnthropicMessagesOptions,
+): MessageCreateParamsStreaming {
+  const params: MessageCreateParamsStreaming = {
+    model: model.id,
+    messages: convertMessages(context.messages),
+    max_tokens: options?.maxTokens ?? model.maxTokens,
+    stream: true,
+  };
+
+  if (context.systemPrompt) {
+    params.system = [
+      {
+        type: "text",
+        text: context.systemPrompt,
+      },
+    ];
+  }
+
+  return params;
 }
 
 function usageFromResponse(data: AnthropicMessagesResponse): Usage {
