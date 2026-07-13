@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   decodeSseLine,
+  iterateSseMessages,
   type SseDecoderState,
 } from "../src/api/anthropic-messages.ts";
 
@@ -63,4 +64,39 @@ test("decodeSseLine assembles consecutive Anthropic response events", () => {
     frames.map((frame) => JSON.parse(frame.data).type),
     ["message_start", "content_block_delta"],
   );
+});
+
+function bodyFromChunks(chunks: string[]): ReadableStream<Uint8Array> {
+  const encoder = new TextEncoder();
+
+  return new ReadableStream({
+    start(controller) {
+      for (const chunk of chunks) {
+        controller.enqueue(encoder.encode(chunk));
+      }
+
+      controller.close();
+    },
+  });
+}
+test("iterateSseMessages handles a line split across network chunks", async () => {
+  const body = bodyFromChunks([
+    "event: message_",
+    'start\ndata: {"type":"message',
+    '_start"}\n\n',
+  ]);
+
+  const frames = [];
+
+  for await (const frame of iterateSseMessages(body)) {
+    frames.push(frame);
+  }
+
+  assert.deepEqual(frames, [
+    {
+      event: "message_start",
+      data: '{"type":"message_start"}',
+      raw: ["event: message_start", 'data: {"type":"message_start"}'],
+    },
+  ]);
 });

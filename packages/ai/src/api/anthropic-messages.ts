@@ -162,6 +162,149 @@ export function decodeSseLine(
 
   return null;
 }
+
+// 在文本缓冲区中查找最早出现的换行符位置。
+// 同时支持 Unix 的 `\n` 和旧式/网络文本中的 `\r`。
+function nextLineBreakIndex(text: string): number {
+  const carriageReturnIndex = text.indexOf("\r");
+  const newlineIndex = text.indexOf("\n");
+  if (carriageReturnIndex === -1) {
+    return newlineIndex;
+  }
+  if (newlineIndex === -1) {
+    return carriageReturnIndex;
+  }
+  return Math.min(carriageReturnIndex, newlineIndex);
+}
+
+// 从 buffer 中取出一条完整的文本行：
+//
+//   "event: message_start\n剩余内容"
+//              |
+//              v
+//   { line: "event: message_start", rest: "剩余内容" }
+//
+// 如果还没有收到换行符，说明这一行可能被拆在两个网络chunk 中，返回 null。
+function consumeLine(text: string): { line: string; rest: string } | null {
+  const lineBreakIndex = nextLineBreakIndex(text);
+
+  if (lineBreakIndex === -1) {
+    return null;
+  }
+
+  let nextIndex = lineBreakIndex + 1;
+
+  // `\r\n` 是一个完整换行符，需要同时跳过两个字符。
+  if (text[lineBreakIndex] === "\r" && text[nextIndex] === "\n") {
+    nextIndex += 1;
+  }
+
+  return {
+    line: text.slice(0, lineBreakIndex),
+    rest: text.slice(nextIndex),
+  };
+}
+
+// 从 HTTP Response.body 持续读取任意大小的二进制 chunk：
+//
+//   Uint8Array chunk
+//          |
+//          v
+//   TextDecoder 转成文本并追加到 buffer
+//          |
+//          v
+//   consumeLine() 取出完整行
+//          |
+//          v
+//   decodeSseLine() 组合 SSE 帧
+//          |
+//          v
+//   yield ServerSentEvent
+//
+// buffer 专门保留尚未形成完整一行的文本，等待下一个chunk 补齐。
+export async function* iterateSseMessages(
+  body: ReadableStream<Uint8Array>,
+  signal?: AbortSignal,
+): AsyncGenerator<ServerSentEvent> {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  const state: SseDecoderState = {
+    event: null,
+    data: [],
+    raw: [],
+  };
+
+  // 保存还没有形成完整一行的文本，等待下一个 chunk 补齐。
+  let buffer = "";
+
+  try {
+    while (true) {
+      if (signal?.aborted) {
+        throw new Error("Request was aborted");
+      }
+
+      const { value, done } = await reader.read();
+
+      if (done) {
+        break;
+      }
+
+      // `{ stream: true }` 表示后续还有字节，保留未完成的 UTF-8 字符。
+      buffer += decoder.decode(value, { stream: true });
+
+      let consumed = consumeLine(buffer);
+
+      while (consumed) {
+        buffer = consumed.rest;
+
+        const event = decodeSseLine(consumed.line, state);
+
+        if (event) {
+          yield event;
+        }
+
+        consumed = consumeLine(buffer);
+      }
+    }
+
+    // 网络流结束后，取出 TextDecoder 内部可能残留的最后几个字节。
+    buffer += decoder.decode();
+
+    let consumed = consumeLine(buffer);
+
+    while (consumed) {
+      buffer = consumed.rest;
+
+      const event = decodeSseLine(consumed.line, state);
+
+      if (event) {
+        yield event;
+      }
+
+      consumed = consumeLine(buffer);
+    }
+
+    // 最后一行可能没有换行符，也要交给 SSE 行解码器。
+    if (buffer.length > 0) {
+      const event = decodeSseLine(buffer, state);
+
+      if (event) {
+        yield event;
+      }
+    }
+
+    // 响应可能没有以空行结尾，仍然需要提交最后一个未完成的帧。
+    const trailingEvent = flushSseEvent(state);
+
+    if (trailingEvent) {
+      yield trailingEvent;
+    }
+  } finally {
+    // 无论正常完成、取消还是异常，都必须释放Response.body 的读取锁。
+    reader.releaseLock();
+  }
+}
+
 function promptFromContext(context: Context): string {
   const lastUser = [...context.messages]
     .reverse()
