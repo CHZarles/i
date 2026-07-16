@@ -1,0 +1,8 @@
+{
+  "name": "i",
+  "description": "一个用 TypeScript 重建 Pi Agent Core 的工程记录。当前代码覆盖消息类型、事件流、认证、Provider 装配、OpenAI Responses 流处理，以及 Anthropic Messages 请求与 SSE 分帧。",
+  "repository": "https://github.com/CHzarles/i",
+  "tests": "19 / 19",
+  "currentFocus": "Anthropic Messages：SSE frame 到 Provider event 的映射",
+  "lastCodeDate": "2026-07-13"
+}

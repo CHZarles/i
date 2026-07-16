@@ -1,0 +1,21 @@
+{
+  "name": "i-pages",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "build:local": "BASE_PATH=/ node build.mjs",
+    "check": "node audit-article-coverage.mjs && node build.mjs --check",
+    "diagrams": "node generate-topology-diagrams.mjs",
+    "smoke": "node smoke.mjs"
+  },
+  "dependencies": {
+    "gray-matter": "4.0.3",
+    "highlight.js": "11.11.1",
+    "markdown-it": "14.1.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,764 @@
+{
+  "anthropic-byte-stream": {
+    "commits": [
+      "7325e31"
+    ],
+    "coverage": [
+      {
+        "commit": "7325e31",
+        "path": "packages/ai/src/api/anthropic-messages.ts",
+        "anchors": [
+          "nextLineBreakIndex",
+          "consumeLine",
+          "iterateSseMessages",
+          "getReader",
+          "TextDecoder",
+          "signal?.aborted",
+          "decoder.decode(value, { stream: true })",
+          "decoder.decode()",
+          "buffer",
+          "flushSseEvent",
+          "releaseLock"
+        ]
+      },
+      {
+        "commit": "7325e31",
+        "path": "packages/ai/test/anthropic-sse-decoder.test.ts",
+        "anchors": [
+          "bodyFromChunks",
+          "iterateSseMessages handles a line split across network chunks",
+          "event: message_",
+          "message_start"
+        ]
+      }
+    ]
+  },
+  "anthropic-request-parameters": {
+    "commits": [
+      "93e4d8a"
+    ],
+    "coverage": [
+      {
+        "commit": "93e4d8a",
+        "path": "package.json",
+        "anchors": [
+          "@anthropic-ai/sdk"
+        ]
+      },
+      {
+        "commit": "93e4d8a",
+        "path": "packages/ai/src/api/anthropic-messages.ts",
+        "anchors": [
+          "MessageCreateParamsStreaming",
+          "MessageParam",
+          "convertMessages",
+          "buildParams",
+          "max_tokens",
+          "stream: true",
+          "params.system"
+        ]
+      },
+      {
+        "commit": "93e4d8a",
+        "path": "packages/ai/test/anthropic-messages-conversion.test.ts",
+        "anchors": [
+          "converts Pi messages into Anthropic messages",
+          "builds MiniMax Anthropic request parameters",
+          "Be concise.",
+          "max_tokens"
+        ]
+      }
+    ]
+  },
+  "anthropic-sse-frames": {
+    "commits": [
+      "60333a4"
+    ],
+    "coverage": [
+      {
+        "commit": "60333a4",
+        "path": "packages/ai/src/api/anthropic-messages.ts",
+        "anchors": [
+          "ServerSentEvent",
+          "SseDecoderState",
+          "flushSseEvent",
+          "decodeSseLine",
+          "line === \"\"",
+          "line.startsWith(\":\")",
+          "delimiterIndex",
+          "state.data.join(\"\\n\")",
+          "raw: [...state.raw]"
+        ]
+      },
+      {
+        "commit": "60333a4",
+        "path": "packages/ai/test/anthropic-sse-decoder.test.ts",
+        "anchors": [
+          "decodeSseLine builds one Anthropic SSE frame",
+          "decodeSseLine assembles consecutive Anthropic response events",
+          "message_start",
+          "content_block_delta"
+        ]
+      }
+    ]
+  },
+  "api-key-auth-resolution": {
+    "commits": [
+      "d0b5c18",
+      "d1e4eaa"
+    ],
+    "coverage": [
+      {
+        "commit": "d0b5c18",
+        "path": "packages/ai/src/auth/types.ts",
+        "anchors": [
+          "ModelAuth",
+          "AuthResult",
+          "ApiKeyCredential",
+          "AuthContext",
+          "AuthPrompt",
+          "AuthLoginCallbacks",
+          "ApiKeyAuth",
+          "interface ProviderAuth"
+        ]
+      },
+      {
+        "commit": "d0b5c18",
+        "path": "packages/ai/src/auth/helpers.ts",
+        "anchors": [
+          "envApiKeyAuth",
+          "login",
+          "callbacks.prompt",
+          "credential?.key",
+          "ctx.env",
+          "return undefined"
+        ]
+      },
+      {
+        "commit": "d0b5c18",
+        "path": "packages/ai/test/test_auth.ts",
+        "anchors": [
+          "envApiKeyAuth",
+          "process.env"
+        ]
+      },
+      {
+        "commit": "d1e4eaa",
+        "path": "packages/ai/test/auth.test.ts",
+        "anchors": [
+          "envApiKeyAuth resolves an env key",
+          "stored credential wins over env key",
+          "missing credential and env returns undefined"
+        ]
+      }
+    ]
+  },
+  "event-stream-lifecycle": {
+    "commits": [
+      "fa4d004",
+      "5a6950f"
+    ],
+    "coverage": [
+      {
+        "commit": "fa4d004",
+        "path": "packages/ai/src/utils/event-stream.ts",
+        "anchors": [
+          "EventStream",
+          "queue",
+          "waiting",
+          "finalResultPromise",
+          "isComplete",
+          "extractResult",
+          "push(",
+          "end(",
+          "Symbol.asyncIterator",
+          "result()",
+          "AssistantMessageEventStream"
+        ]
+      },
+      {
+        "commit": "fa4d004",
+        "path": "packages/ai/src/types.ts",
+        "anchors": [
+          "StreamOptions",
+          "SimpleStreamOptions",
+          "TextContent",
+          "Usage",
+          "StopReason",
+          "UserMessage",
+          "AssistantMessage",
+          "Message",
+          "Context",
+          "AssistantMessageEvent",
+          "StreamFunction"
+        ]
+      },
+      {
+        "commit": "5a6950f",
+        "path": "packages/ai/test/event-stream.test.ts",
+        "anchors": [
+          "AssistantMessageEventStream yields events and returns final message",
+          "start",
+          "done",
+          "result()"
+        ]
+      }
+    ]
+  },
+  "model-api-provider-types": {
+    "commits": [
+      "6ca7174",
+      "d0b5c18",
+      "7b8b954",
+      "9077082"
+    ],
+    "coverage": [
+      {
+        "commit": "6ca7174",
+        "path": "package.json",
+        "anchors": [
+          "dotenv"
+        ]
+      },
+      {
+        "commit": "6ca7174",
+        "path": "packages/ai/src/providers/openai-responses.ts",
+        "anchors": [
+          "OpenAIConfig",
+          "callOpenAI",
+          "/responses",
+          "authorization",
+          "input",
+          "res.ok",
+          "res.json"
+        ]
+      },
+      {
+        "commit": "6ca7174",
+        "path": "packages/ai/test/test_provider.ts",
+        "anchors": [
+          "config({ override: true })",
+          "OPENAI_API_KEY",
+          "OPENAI_BASE_URL",
+          "Say hi"
+        ]
+      },
+      {
+        "commit": "d0b5c18",
+        "path": "package.json",
+        "anchors": [
+          "\"type\": \"module\""
+        ]
+      },
+      {
+        "commit": "d0b5c18",
+        "path": "packages/ai/src/providers/openai-responses.ts",
+        "anchors": [
+          "data.output",
+          "output_text",
+          "join(\"\")"
+        ]
+      },
+      {
+        "commit": "d0b5c18",
+        "path": "packages/ai/src/types.ts",
+        "anchors": [
+          "KnownApi",
+          "Api",
+          "ProviderEnv",
+          "ProviderHeaders",
+          "KnownProvider",
+          "ProviderId",
+          "Model",
+          "reasoning",
+          "contextWindow",
+          "maxTokens"
+        ]
+      },
+      {
+        "commit": "7b8b954",
+        "path": "packages/ai/src/providers/minimax.models.ts",
+        "anchors": [
+          "MINIMAX_MODELS",
+          "MiniMax-M3",
+          "anthropic-messages",
+          "contextWindow",
+          "maxTokens"
+        ]
+      },
+      {
+        "commit": "9077082",
+        "path": "packages/ai/test/provider.test.ts",
+        "anchors": [
+          "assert.equal(model.provider, \"openai\")",
+          "assert.equal(model.api, \"openai-responses\")",
+          "assert.equal(model.provider, \"minimax\")",
+          "assert.equal(model.api, \"anthropic-messages\")"
+        ]
+      }
+    ]
+  },
+  "openai-message-conversion": {
+    "commits": [
+      "8487b80",
+      "9a0b378",
+      "d26d12e"
+    ],
+    "coverage": [
+      {
+        "commit": "8487b80",
+        "path": "packages/ai/src/types.ts",
+        "anchors": [
+          "systemPrompt"
+        ]
+      },
+      {
+        "commit": "8487b80",
+        "path": "packages/ai/src/api/openai-responses.ts",
+        "anchors": [
+          "inputFromContext",
+          "developer",
+          "system",
+          "input_text",
+          "output_text"
+        ]
+      },
+      {
+        "commit": "9a0b378",
+        "path": "packages/ai/src/api/openai-responses-shared.ts",
+        "anchors": [
+          "convertResponsesMessages",
+          "developer",
+          "system",
+          "input_text",
+          "output_text",
+          "status: \"completed\""
+        ]
+      },
+      {
+        "commit": "d26d12e",
+        "path": "packages/ai/test/openai-responses-conversion.test.ts",
+        "anchors": [
+          "convertResponsesMessages maps Pi context to OpenAI Responses input",
+          "Be concise.",
+          "Hi there"
+        ]
+      }
+    ]
+  },
+  "openai-text-progress-events": {
+    "commits": [
+      "b24b36b",
+      "71de1ed"
+    ],
+    "coverage": [
+      {
+        "commit": "b24b36b",
+        "path": "packages/ai/src/api/openai-responses-shared.ts",
+        "anchors": [
+          "contentIndex",
+          "text_start",
+          "text_delta",
+          "partial: output"
+        ]
+      },
+      {
+        "commit": "b24b36b",
+        "path": "packages/ai/src/types.ts",
+        "anchors": [
+          "text_start",
+          "text_delta",
+          "contentIndex",
+          "partial"
+        ]
+      },
+      {
+        "commit": "b24b36b",
+        "path": "packages/ai/test/openai-responses-stream.test.ts",
+        "anchors": [
+          "processResponsesStream emits text progress events",
+          "text_start",
+          "text_delta"
+        ]
+      },
+      {
+        "commit": "71de1ed",
+        "path": "packages/ai/src/api/openai-responses-shared.ts",
+        "anchors": [
+          "response.output_item.done",
+          "text_end",
+          "textSlots.delete"
+        ]
+      },
+      {
+        "commit": "71de1ed",
+        "path": "packages/ai/src/types.ts",
+        "anchors": [
+          "text_end",
+          "content: string"
+        ]
+      },
+      {
+        "commit": "71de1ed",
+        "path": "packages/ai/test/openai-responses-stream.test.ts",
+        "anchors": [
+          "text_end",
+          "Hello"
+        ]
+      }
+    ]
+  },
+  "openai-text-stream-state": {
+    "commits": [
+      "d370acd",
+      "19d9732"
+    ],
+    "coverage": [
+      {
+        "commit": "d370acd",
+        "path": "packages/ai/src/api/openai-responses-shared.ts",
+        "anchors": [
+          "OpenAITextStreamEvent",
+          "processResponsesStream",
+          "textSlots",
+          "response.output_item.added",
+          "response.output_text.delta",
+          "response.completed",
+          "sawCompleted",
+          "responseId",
+          "totalTokens",
+          "OpenAI Responses stream ended before completed event"
+        ]
+      },
+      {
+        "commit": "d370acd",
+        "path": "packages/ai/test/openai-responses-stream.test.ts",
+        "anchors": [
+          "processResponsesStream converts OpenAI text deltas into assistant text",
+          "Hello",
+          "resp_123"
+        ]
+      },
+      {
+        "commit": "19d9732",
+        "path": "packages/ai/src/api/openai-responses-shared.ts",
+        "anchors": [
+          "response.failed",
+          "Unknown error (no error details in response)"
+        ]
+      },
+      {
+        "commit": "19d9732",
+        "path": "packages/ai/test/openai-responses-stream.test.ts",
+        "anchors": [
+          "processResponsesStream throws on OpenAI failed response",
+          "server_error: boom"
+        ]
+      }
+    ]
+  },
+  "openai-tool-call-events": {
+    "commits": [
+      "b47fbeb",
+      "ee5ca8b"
+    ],
+    "coverage": [
+      {
+        "commit": "b47fbeb",
+        "path": "packages/ai/src/api/openai-responses-shared.ts",
+        "anchors": [
+          "toolcall_start",
+          "toolcall_delta",
+          "toolcall_end",
+          "toolCall: slot.block"
+        ]
+      },
+      {
+        "commit": "b47fbeb",
+        "path": "packages/ai/src/types.ts",
+        "anchors": [
+          "toolcall_start",
+          "toolcall_delta",
+          "toolcall_end"
+        ]
+      },
+      {
+        "commit": "b47fbeb",
+        "path": "packages/ai/test/openai-responses-stream.test.ts",
+        "anchors": [
+          "processResponsesStream emits tool call progress events",
+          "toolcall_start",
+          "toolcall_end"
+        ]
+      },
+      {
+        "commit": "ee5ca8b",
+        "path": "packages/ai/src/api/openai-responses-shared.ts",
+        "anchors": [
+          "stopReason",
+          "toolUse",
+          "output.content.some"
+        ]
+      },
+      {
+        "commit": "ee5ca8b",
+        "path": "packages/ai/src/types.ts",
+        "anchors": [
+          "StopReason",
+          "toolUse",
+          "reason: \"stop\" | \"toolUse\""
+        ]
+      },
+      {
+        "commit": "ee5ca8b",
+        "path": "packages/ai/test/openai-responses-stream.test.ts",
+        "anchors": [
+          "output.stopReason",
+          "toolUse"
+        ]
+      }
+    ]
+  },
+  "openai-tool-call-state": {
+    "commits": [
+      "431db4e",
+      "a0027f9"
+    ],
+    "coverage": [
+      {
+        "commit": "431db4e",
+        "path": "packages/ai/src/api/openai-responses-shared.ts",
+        "anchors": [
+          "OpenAIFunctionCallItem",
+          "toolCallSlots",
+          "function_call",
+          "call_id",
+          "partialJson",
+          "response.function_call_arguments.delta",
+          "JSON.parse",
+          "TextContent"
+        ]
+      },
+      {
+        "commit": "431db4e",
+        "path": "packages/ai/src/types.ts",
+        "anchors": [
+          "ToolCall",
+          "TextContent | ToolCall"
+        ]
+      },
+      {
+        "commit": "431db4e",
+        "path": "packages/ai/test/openai-responses-stream.test.ts",
+        "anchors": [
+          "processResponsesStream converts OpenAI function call into toolCall block",
+          "get_weather",
+          "call_1|fc_1"
+        ]
+      },
+      {
+        "commit": "a0027f9",
+        "path": "packages/ai/src/api/openai-responses-shared.ts",
+        "anchors": [
+          "OpenAIUnsupportedItem",
+          "reasoning",
+          "event.item.type !== \"message\""
+        ]
+      }
+    ]
+  },
+  "openai-wrapper-network": {
+    "commits": [
+      "731d1b5",
+      "8487b80",
+      "7c4c9fe",
+      "7a997db"
+    ],
+    "coverage": [
+      {
+        "commit": "731d1b5",
+        "path": "packages/ai/src/api/openai-responses.ts",
+        "anchors": [
+          "OpenAIResponsesOptions",
+          "OpenAIResponsesResponse",
+          "promptFromContext",
+          "usageFromResponse",
+          "outputText",
+          "createMessage",
+          "createErrorMessage",
+          "streamSimple",
+          "export const stream",
+          "fetch(",
+          "res.json"
+        ]
+      },
+      {
+        "commit": "8487b80",
+        "path": "packages/ai/src/api/openai-responses.ts",
+        "anchors": [
+          "createErrorMessage"
+        ]
+      },
+      {
+        "commit": "7c4c9fe",
+        "path": "packages/ai/test/openai-responses-wrapper.test.ts",
+        "anchors": [
+          "streamSimple sends OpenAI Responses request and returns assistant message",
+          "capturedUrl",
+          "capturedInit",
+          "Bearer test-key"
+        ]
+      },
+      {
+        "commit": "7a997db",
+        "path": "packages/ai/src/api/openai-responses.ts",
+        "anchors": [
+          "parseResponsesSse",
+          "response.body",
+          "response.text",
+          "split(\"\\n\\n\")",
+          "data:",
+          "[DONE]",
+          "JSON.parse",
+          "stream: true",
+          "processResponsesStream"
+        ]
+      },
+      {
+        "commit": "7a997db",
+        "path": "packages/ai/test/openai-responses-wrapper.test.ts",
+        "anchors": [
+          "requestBody.stream",
+          "text_start",
+          "text_end",
+          "done"
+        ]
+      }
+    ]
+  },
+  "provider-adapter-wiring": {
+    "commits": [
+      "afe53cb",
+      "7b8b954",
+      "fa4d004",
+      "731d1b5",
+      "9077082"
+    ],
+    "coverage": [
+      {
+        "commit": "afe53cb",
+        "path": "packages/ai/src/models.ts",
+        "anchors": [
+          "Provider",
+          "CreateProviderOptions",
+          "createProvider",
+          "baseUrl",
+          "headers",
+          "auth",
+          "getModels"
+        ]
+      },
+      {
+        "commit": "afe53cb",
+        "path": "packages/ai/test/test_models.ts",
+        "anchors": [
+          "createProvider",
+          "getModels"
+        ]
+      },
+      {
+        "commit": "7b8b954",
+        "path": "packages/ai/src/providers/openai.models.ts",
+        "anchors": [
+          "OPENAI_MODELS",
+          "satisfies Model<\"openai-responses\">"
+        ]
+      },
+      {
+        "commit": "7b8b954",
+        "path": "packages/ai/src/providers/minimax.models.ts",
+        "anchors": [
+          "MINIMAX_MODELS",
+          "satisfies Model<\"anthropic-messages\">"
+        ]
+      },
+      {
+        "commit": "7b8b954",
+        "path": "packages/ai/src/providers/openai.ts",
+        "anchors": [
+          "openaiProvider",
+          "OPENAI_API_KEY"
+        ]
+      },
+      {
+        "commit": "7b8b954",
+        "path": "packages/ai/src/providers/minimax.ts",
+        "anchors": [
+          "minimaxProvider",
+          "MINIMAX_API_KEY"
+        ]
+      },
+      {
+        "commit": "fa4d004",
+        "path": "packages/ai/src/models.ts",
+        "anchors": [
+          "ProviderStreams",
+          "stream(",
+          "streamSimple(",
+          "input.api.stream",
+          "input.api.streamSimple"
+        ]
+      },
+      {
+        "commit": "fa4d004",
+        "path": "packages/ai/src/types.ts",
+        "anchors": [
+          "ProviderStreams",
+          "ApiStreamOptions",
+          "SimpleStreamOptions"
+        ]
+      },
+      {
+        "commit": "fa4d004",
+        "path": "packages/ai/src/api/openai-responses.lazy.ts",
+        "anchors": [
+          "openAIResponsesApi",
+          "ProviderStreams"
+        ]
+      },
+      {
+        "commit": "fa4d004",
+        "path": "packages/ai/test/test_openai_provider_stream.ts",
+        "anchors": [
+          "openaiProvider()",
+          "OPENAI_BASE_URL",
+          "OPENAI_API_KEY",
+          ".result()"
+        ]
+      },
+      {
+        "commit": "731d1b5",
+        "path": "packages/ai/src/api/anthropic-messages.lazy.ts",
+        "anchors": [
+          "anthropicMessagesApi",
+          "ProviderStreams"
+        ]
+      },
+      {
+        "commit": "731d1b5",
+        "path": "packages/ai/src/providers/minimax.ts",
+        "anchors": [
+          "anthropicMessagesApi"
+        ]
+      },
+      {
+        "commit": "9077082",
+        "path": "packages/ai/test/provider.test.ts",
+        "anchors": [
+          "openaiProvider exposes model catalog and auth",
+          "minimaxProvider exposes Anthropic-style model catalog and auth"
+        ]
+      }
+    ]
+  }
+}
