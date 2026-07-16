@@ -13,6 +13,7 @@ import { AssistantMessageEventStream } from "../utils/event-stream.ts";
 import type {
   MessageCreateParamsStreaming,
   MessageParam,
+  RawMessageStreamEvent,
 } from "@anthropic-ai/sdk/resources/messages.js";
 
 type AnthropicMessagesConfig = {
@@ -62,6 +63,16 @@ export interface SseDecoderState {
   data: string[];
   raw: string[];
 }
+
+// 只接受 Anthropic Messages 协议中会影响消息内容和生命周期的事件。
+const ANTHROPIC_MESSAGE_EVENTS: ReadonlySet<string> = new Set([
+  "message_start",
+  "message_delta",
+  "message_stop",
+  "content_block_start",
+  "content_block_delta",
+  "content_block_stop",
+]);
 
 // 在读到空行时结束当前帧：
 //
@@ -302,6 +313,59 @@ export async function* iterateSseMessages(
   } finally {
     // 无论正常完成、取消还是异常，都必须释放Response.body 的读取锁。
     reader.releaseLock();
+  }
+}
+
+// 把通用 SSE 帧转换成 Anthropic SDK 定义的事件对象。
+// `yield` 会让调用方通过 `for await` 逐个收到事件。
+export async function* iterateAnthropicEvents(
+  response: Response,
+  signal?: AbortSignal,
+): AsyncGenerator<RawMessageStreamEvent> {
+  if (!response.body) {
+    throw new Error(
+      "Attempted to iterate over an Anthropic response with no body",
+    );
+  }
+
+  let sawMessageStart = false;
+  let sawMessageStop = false;
+
+  for await (const sse of iterateSseMessages(response.body, signal)) {
+    if (sse.event === "error") {
+      throw new Error(sse.data);
+    }
+
+    // 忽略 ping 等不属于 Anthropic 消息生命周期的 SSE 帧。
+    if (!ANTHROPIC_MESSAGE_EVENTS.has(sse.event ?? "")) {
+      continue;
+    }
+
+    let event: RawMessageStreamEvent;
+
+    try {
+      event = JSON.parse(sse.data) as RawMessageStreamEvent;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+
+      throw new Error(
+        `Could not parse Anthropic SSE event ${sse.event}: ` +
+          `${message}; data=${sse.data}; raw=${sse.raw.join("\\n")}`,
+      );
+    }
+
+    if (event.type === "message_start") {
+      sawMessageStart = true;
+    } else if (event.type === "message_stop") {
+      sawMessageStop = true;
+    }
+
+    yield event;
+  }
+
+  // 已经开始的 Anthropic 消息必须由 message_stop 正常结束。
+  if (sawMessageStart && !sawMessageStop) {
+    throw new Error("Anthropic stream ended before message_stop");
   }
 }
 
