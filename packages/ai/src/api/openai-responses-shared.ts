@@ -155,7 +155,9 @@ export async function processResponsesStream(
 
       // Copy provider metadata into Pi's assistant message shape.
       output.responseId = event.response.id;
-      output.stopReason = output.content.some((block) => block.type === "toolCall")
+      output.stopReason = output.content.some(
+        (block) => block.type === "toolCall",
+      )
         ? "toolUse"
         : "stop";
 
@@ -223,13 +225,47 @@ export async function processResponsesStream(
   }
 }
 
+// 把 Pi 内部的 Context 翻译成 OpenAI Responses SDK 能发送的 input。
+//
+// Runtime shape:
+//   Context(systemPrompt + messages[])
+//     -> convertResponsesMessages()
+//     -> ResponseInput
+//     -> client.responses.create({ input, stream: true })
+//
+// Example:
+//   { systemPrompt: "Be concise.", messages: [
+//     { role: "user", content: "Hello" },
+//     { role: "assistant", content: [{ type: "text", text: "Hi." }] },
+//   ] }
+//
+// becomes:
+//   [
+//     { role: "system", content: "Be concise." },
+//     { role: "user", content: [{ type: "input_text", text: "Hello" }] },
+//     {
+//       type: "message",
+//       id: "msg_pi_1",
+//       role: "assistant",
+//       content: [{ type: "output_text", text: "Hi.", annotations: [] }],
+//       status: "completed",
+//     },
+//   ]
+//
+// 这个函数只负责"请求数据形状转换"，不发网络请求，也不处理流式返回。
 export function convertResponsesMessages(
   model: Model<"openai-responses">,
   context: Context,
 ): ResponseInput {
+  // OpenAI 的 input 是一个数组。每个元素都是一条要回放给模型的消息：
+  // system/developer prompt、user input、assistant 历史输出等。
   const input: ResponseInput = [];
 
   if (context.systemPrompt) {
+    // 同一段 Pi systemPrompt，在 OpenAI Responses 里可能要换 role：
+    // - 普通模型：system
+    // - reasoning 模型：developer
+    // 这是 OpenAI 协议差异，所以放在 OpenAI adapter 里处理。
     input.push({
       role: model.reasoning ? "developer" : "system",
       content: context.systemPrompt,
@@ -238,6 +274,11 @@ export function convertResponsesMessages(
 
   for (const [messageIndex, message] of context.messages.entries()) {
     if (message.role === "user") {
+      // Pi 的 user message 在当前切片里是纯字符串：
+      //   { role: "user", content: "Hello" }
+      //
+      // OpenAI Responses 要的是 content block：
+      //   { role: "user", content: [{ type: "input_text", text: "Hello" }] }
       input.push({
         role: "user",
         content: [{ type: "input_text", text: message.content }],
@@ -245,12 +286,21 @@ export function convertResponsesMessages(
       continue;
     }
 
+    // assistant history 是"模型之前说过什么"。
+    // Pi 内部把 assistant content 存成 block 数组：
+    //   [{ type: "text", text: "Hi" }, { type: "toolCall", ... }]
+    //
+    // 当前切片只回放 text block，所以先过滤出 TextContent，再拼成一段文本。
+    // toolCall/toolResult/image/reasoning 会在后面的 tool protocol 节点补齐。
     const text = message.content
       .filter((block): block is TextContent => block.type === "text")
       .map((block) => block.text)
       .join("");
     if (!text) continue;
 
+    // OpenAI Responses 要求回放 assistant 历史消息时带一个 id。
+    // 这条消息来自 Pi 的本地历史，不一定保留了 OpenAI 原始 response item id。
+    // 先用消息下标生成稳定 id；后续完整工具/跨 provider 回放时再补更严格的 id 规则。
     input.push({
       type: "message",
       id: `msg_pi_${messageIndex}`,
