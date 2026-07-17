@@ -6,10 +6,12 @@ import type {
   SimpleStreamOptions,
   StreamFunction,
   StreamOptions,
+  TextContent,
   Usage,
 } from "../types.ts";
 import { AssistantMessageEventStream } from "../utils/event-stream.ts";
 
+import Anthropic from "@anthropic-ai/sdk";
 import type {
   MessageCreateParamsStreaming,
   MessageParam,
@@ -527,46 +529,114 @@ export const streamSimple: StreamFunction<
 > = (model, context, options): AssistantMessageEventStream => {
   const stream = new AssistantMessageEventStream();
 
+  const output: AssistantMessage = {
+    ...createMessage(model, ""),
+    content: [],
+  };
+
   void (async () => {
     try {
-      if (!options?.apiKey) throw new Error("No API key for provider");
+      if (!options?.apiKey) {
+        throw new Error("No API key for provider");
+      }
 
-      const partial = createMessage(model, "");
-      stream.push({ type: "start", partial });
+      const client = new Anthropic({
+        apiKey: options.apiKey,
+        baseURL: model.baseUrl,
+        maxRetries: 0,
+        dangerouslyAllowBrowser: true,
+      });
 
-      const res = await fetch(
-        `${model.baseUrl.replace(/\/+$/, "")}/v1/messages`,
-        {
-          method: "POST",
-          headers: {
-            "x-api-key": options.apiKey,
-            "anthropic-version": "2023-06-01",
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({
-            model: model.id,
-            max_tokens: options.maxTokens ?? model.maxTokens,
-            messages: [
-              {
-                role: "user",
-                content: promptFromContext(context),
-              },
-            ],
-          }),
-        },
-      );
+      const params = buildParams(model, context, options);
+      const response = await client.messages
+        .create({ ...params, stream: true })
+        .asResponse();
 
-      if (!res.ok) throw new Error(await res.text());
+      stream.push({ type: "start", partial: output });
 
-      const data = (await res.json()) as AnthropicMessagesResponse;
-      const message = createMessage(model, outputText(data), data);
+      // Anthropic 的 block index 和 Pi output.content 的数组下标属于不同协议层。
+      const textSlots = new Map<number, number>();
 
-      stream.push({ type: "done", reason: "stop", message });
-      stream.end(message);
+      for await (const event of iterateAnthropicEvents(response)) {
+        if (event.type === "message_start") {
+          output.responseId = event.message.id;
+          output.usage.input = event.message.usage.input_tokens ?? 0;
+          output.usage.output = event.message.usage.output_tokens ?? 0;
+          output.usage.totalTokens = output.usage.input + output.usage.output;
+          continue;
+        }
+
+        if (
+          event.type === "content_block_start" &&
+          event.content_block.type === "text"
+        ) {
+          const block: TextContent = { type: "text", text: "" };
+          output.content.push(block);
+
+          const contentIndex = output.content.length - 1;
+          textSlots.set(event.index, contentIndex);
+
+          stream.push({ type: "text_start", contentIndex, partial: output });
+          continue;
+        }
+
+        if (
+          event.type === "content_block_delta" &&
+          event.delta.type === "text_delta"
+        ) {
+          const contentIndex = textSlots.get(event.index);
+          if (contentIndex === undefined) continue;
+
+          const block = output.content[contentIndex];
+          if (!block || block.type !== "text") continue;
+
+          block.text += event.delta.text;
+          stream.push({
+            type: "text_delta",
+            contentIndex,
+            delta: event.delta.text,
+            partial: output,
+          });
+          continue;
+        }
+
+        if (event.type === "content_block_stop") {
+          const contentIndex = textSlots.get(event.index);
+          if (contentIndex === undefined) continue;
+
+          const block = output.content[contentIndex];
+          if (!block || block.type !== "text") continue;
+
+          stream.push({
+            type: "text_end",
+            contentIndex,
+            content: block.text,
+            partial: output,
+          });
+
+          textSlots.delete(event.index);
+          continue;
+        }
+
+        if (event.type === "message_delta") {
+          output.stopReason =
+            event.delta.stop_reason === "tool_use" ? "toolUse" : "stop";
+          output.usage.output =
+            event.usage.output_tokens ?? output.usage.output;
+          output.usage.totalTokens = output.usage.input + output.usage.output;
+        }
+      }
+
+      const reason = output.stopReason === "toolUse" ? "toolUse" : "stop";
+      stream.push({ type: "done", reason, message: output });
+      stream.end();
     } catch (error) {
-      const message = createErrorMessage(model, error);
-      stream.push({ type: "error", reason: "error", error: message });
-      stream.end(message);
+      output.stopReason = "error";
+      output.errorMessage =
+        error instanceof Error ? error.message : String(error);
+
+      stream.push({ type: "error", reason: "error", error: output });
+      stream.end();
     }
   })();
 

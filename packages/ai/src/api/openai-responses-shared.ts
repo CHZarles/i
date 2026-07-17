@@ -1,4 +1,8 @@
 import type {
+  ResponseInput,
+  ResponseStreamEvent,
+} from "openai/resources/responses/responses.js";
+import type {
   AssistantMessage,
   AssistantMessageEventStream,
   // Conversation history passed into the model.
@@ -8,81 +12,6 @@ import type {
   ToolCall,
   TextContent,
 } from "../types.ts";
-
-type ResponsesInputItem =
-  | { role: "system" | "developer"; content: string }
-  | { role: "user"; content: { type: "input_text"; text: string }[] }
-  | {
-      type: "message";
-      role: "assistant";
-      content: { type: "output_text"; text: string; annotations: [] }[];
-      status: "completed";
-    };
-
-type OpenAIMessageItem = {
-  type: "message";
-  content?: { type: string; text?: string }[];
-};
-
-type OpenAIFunctionCallItem = {
-  type: "function_call";
-  id: string;
-  call_id: string;
-  name: string;
-  arguments?: string;
-};
-
-type OpenAIUnsupportedItem = {
-  type: "reasoning";
-};
-
-type OpenAITextStreamEvent =
-  // OpenAI says: a new output item started.
-  // For this first slice, we only care when the item is an assistant message.
-  | {
-      type: "response.output_item.added";
-      output_index: number;
-      item: OpenAIMessageItem | OpenAIFunctionCallItem | OpenAIUnsupportedItem;
-    }
-  // OpenAI says: here is the next piece of text for one output item.
-  // Multiple delta events together become the final assistant text.
-  | {
-      type: "response.output_text.delta";
-      output_index: number;
-      delta: string;
-    }
-  // tool related
-  | {
-      type: "response.function_call_arguments.delta";
-      output_index: number;
-      delta: string;
-    }
-  // OpenAI says: the response is finished, and here is final metadata.
-  // This event gives us response id, stop state, and token usage.
-  | {
-      type: "response.completed";
-      response: {
-        id?: string;
-        status?: string;
-        usage?: {
-          input_tokens?: number;
-          output_tokens?: number;
-          total_tokens?: number;
-        };
-      };
-    }
-  // OpenAI says: the response is failed
-  | {
-      type: "response.failed";
-      response?: {
-        error?: { code?: string; message?: string };
-      };
-    }
-  | {
-      type: "response.output_item.done";
-      output_index: number;
-      item: OpenAIMessageItem | OpenAIFunctionCallItem | OpenAIUnsupportedItem;
-    };
 
 /*
   response.output_item.done = one output block is finished
@@ -104,7 +33,7 @@ type OpenAITextStreamEvent =
 export async function processResponsesStream(
   // The provider event source. In the test this is an async generator;
   // later it can be real SSE/network events.
-  openaiStream: AsyncIterable<OpenAITextStreamEvent>,
+  openaiStream: AsyncIterable<ResponseStreamEvent>,
 
   // The single assistant message being built in-place.
   // This function mutates output.content, output.usage, output.responseId.
@@ -297,8 +226,8 @@ export async function processResponsesStream(
 export function convertResponsesMessages(
   model: Model<"openai-responses">,
   context: Context,
-): ResponsesInputItem[] {
-  const input: ResponsesInputItem[] = [];
+): ResponseInput {
+  const input: ResponseInput = [];
 
   if (context.systemPrompt) {
     input.push({
@@ -307,7 +236,7 @@ export function convertResponsesMessages(
     });
   }
 
-  for (const message of context.messages) {
+  for (const [messageIndex, message] of context.messages.entries()) {
     if (message.role === "user") {
       input.push({
         role: "user",
@@ -324,6 +253,7 @@ export function convertResponsesMessages(
 
     input.push({
       type: "message",
+      id: `msg_pi_${messageIndex}`,
       role: "assistant",
       content: [{ type: "output_text", text, annotations: [] }],
       status: "completed",

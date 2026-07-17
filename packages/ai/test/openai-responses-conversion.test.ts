@@ -47,6 +47,7 @@ test("convertResponsesMessages maps Pi context to OpenAI Responses input", () =>
     { role: "user", content: [{ type: "input_text", text: "Hello" }] },
     {
       type: "message",
+      id: "msg_pi_1",
       role: "assistant",
       content: [{ type: "output_text", text: "Hi there", annotations: [] }],
       status: "completed",

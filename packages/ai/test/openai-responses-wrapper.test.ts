@@ -80,9 +80,9 @@ test("streamSimple sends OpenAI Responses request and returns assistant message"
     assert.equal(capturedUrl, "https://api.openai.com/v1/responses");
     assert.equal(capturedInit?.method, "POST");
 
-    const headers = capturedInit?.headers as Record<string, string>;
-    assert.equal(headers.authorization, "Bearer test-key");
-    assert.equal(headers["content-type"], "application/json");
+    const headers = new Headers(capturedInit?.headers);
+    assert.equal(headers.get("authorization"), "Bearer test-key");
+    assert.equal(headers.get("content-type"), "application/json");
 
     const requestBody = JSON.parse(String(capturedInit?.body));
     assert.equal(requestBody.model, "gpt-test");
