@@ -60,11 +60,11 @@ for (const name of await readdir(articlesDir)) {
   topologyBySlug.set(slug, topologyImages[0][1]);
 }
 
-if (publishedSlugs.length !== 13) throw new Error(`expected 13 focused articles, found ${publishedSlugs.length}`);
+if (publishedSlugs.length !== 14) throw new Error(`expected 14 focused articles, found ${publishedSlugs.length}`);
 assertDeepEqual(
   publishedSequences.slice().sort((a, b) => a - b),
-  Array.from({ length: 13 }, (_, index) => index + 1),
-  'article sequences must cover 1 through 13 exactly',
+  Array.from({ length: 14 }, (_, index) => index + 1),
+  'article sequences must cover 1 through 14 exactly',
 );
 
 for (const slug of publishedSlugs) {

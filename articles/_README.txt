@@ -35,6 +35,9 @@ Do not invent personal experience or use first-person narration. Run rn-renhua a
 Series style:
 
 - Start from the Agent Runtime topology, then introduce one runtime concept.
+- Define every project-specific term before the thesis or code first depends on it.
+- Treat Provider, API implementation/Adapter, wrapper, SDK/fetch, and external
+  Provider HTTP API as different concepts; never use them as synonyms.
 - Explain why the boundary exists before showing code.
 - Use small code slices as concrete expressions of the concept.
 - End with the proof, current topology node, and one next prerequisite.

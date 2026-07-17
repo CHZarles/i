@@ -1,7 +1,7 @@
 ---
 title: 'EventStream 同时提供过程事件和最终消息'
 date: '2026-07-05'
-updated: '2026-07-16'
+updated: '2026-07-17'
 sequence: 3
 tags: ['event-stream', 'async-iterator', 'runtime']
 summary: 'for await 消费过程，result() 等待最终 AssistantMessage，两种读取方式共享同一个结束条件。'
@@ -13,6 +13,18 @@ draft: false
 ---
 
 ![AssistantMessageEventStream 在 Provider 返回路径中的位置](assets/topology-event-stream.svg)
+
+## 名词约定：过程、结果与编排属于不同对象
+
+| 名称 | 本文含义 |
+| --- | --- |
+| Agent Runtime | 负责调用模型、消费增量、处理工具并维护对话推进的运行机制 |
+| Agent Loop | Runtime 中反复执行“调用模型 -> 读取结果 -> 决定下一步”的编排循环 |
+| `EventStream<T, R>` | 过程侧可异步遍历 `T` 事件、结果侧可等待最终 `R` 的对象 |
+| wrapper | API implementation 中包住一次网络请求的外层函数，负责 `start/done/error` 生命周期 |
+| Adapter / API implementation | 把 Provider 原生请求与事件翻译成 Pi 类型的协议模块 |
+
+EventStream 是数据合同，Agent Loop 是消费者，wrapper 是生产者所在的请求边界。
 
 ## 结论先行
 

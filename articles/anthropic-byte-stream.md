@@ -1,7 +1,7 @@
 ---
 title: 'ReadableStream 只交付字节 chunk：先恢复行，再恢复 SSE 帧'
 date: '2026-07-13'
-updated: '2026-07-16'
+updated: '2026-07-17'
 sequence: 13
 tags: ['anthropic', 'stream', 'bytes']
 summary: 'iterateSseMessages() 用流式 TextDecoder 和文本 buffer 跨 chunk 恢复完整行，再把行交给 SSE 帧状态机。'
@@ -13,6 +13,19 @@ draft: false
 ---
 
 ![Anthropic 字节流读取在网络返回路径中的位置](assets/topology-anthropic-bytes.svg)
+
+## 名词约定：网络边界不会替上层保留文本结构
+
+| 名称 | 本文含义 |
+| --- | --- |
+| `ReadableStream<Uint8Array>` | HTTP Response body 暴露的异步字节流 |
+| chunk | 一次 `reader.read()` 返回的任意大小字节块，不保证字符、行或事件完整 |
+| `TextDecoder` | 把 UTF-8 字节持续恢复为 JavaScript 字符串的标准对象 |
+| buffer | 保存已解码但尚未形成完整文本行的字符串 |
+| SSE state | 保存完整行已经提供、但空行尚未结束的当前帧状态 |
+| wrapper | 发起 Anthropic 请求并把 `Response.body` 交给读取器的外层请求函数 |
+
+decoder、buffer 与 SSE state 分别保护字符、行和帧边界；任何一个都不能代替另外两个。
 
 ## 结论先行
 

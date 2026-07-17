@@ -1,7 +1,7 @@
 ---
 title: '把完整 Context 转成 OpenAI Responses input'
 date: '2026-07-07'
-updated: '2026-07-16'
+updated: '2026-07-17'
 sequence: 5
 tags: ['openai', 'context', 'conversion']
 summary: '消息转换从网络 wrapper 中抽离，system、user 和 assistant 历史可以在无网络条件下独立验证。'
@@ -13,6 +13,17 @@ draft: false
 ---
 
 ![Context 转换在 OpenAI API implementation 中的位置](assets/topology-openai-conversion.svg)
+
+## 名词约定：通用对话与协议请求是两种表示
+
+| 名称 | 本文含义 |
+| --- | --- |
+| `Context` | Pi 内部的 Provider 无关对话输入，包含 system prompt 和消息历史 |
+| Responses `input[]` | OpenAI Responses API 接收的协议专用请求项数组 |
+| 转换函数 | 只把一种数据表示变成另一种表示、不访问网络的纯函数 |
+| wrapper | 调用转换函数、组装 HTTP 请求并处理响应生命周期的外层请求函数 |
+
+`Context` 会保留在 Agent Runtime 中；Responses `input[]` 只为当前 OpenAI 请求临时生成。
 
 ## 结论先行
 

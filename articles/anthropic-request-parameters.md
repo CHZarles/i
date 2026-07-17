@@ -1,7 +1,7 @@
 ---
 title: '第二种协议从请求对象开始：把 Pi Context 转成 Anthropic Messages'
 date: '2026-07-11'
-updated: '2026-07-16'
+updated: '2026-07-17'
 sequence: 11
 tags: ['anthropic', 'request', 'conversion']
 summary: 'OpenAI 流式闭环完成后，项目开始接入 Anthropic Messages；这一阶段先完成 Context 到请求参数的纯转换。'
@@ -13,6 +13,18 @@ draft: false
 ---
 
 ![Anthropic 请求参数在 API implementation 与网络之间的位置](assets/topology-anthropic-request.svg)
+
+## 名词约定：复用上层合同不代表复用协议对象
+
+| 名称 | 本文含义 |
+| --- | --- |
+| Anthropic Messages | 一套具体的 HTTP 请求、响应与流事件协议；MiniMax 提供兼容 endpoint |
+| request object / 请求对象 | 序列化进 HTTP body 的协议数据，例如 `MessageCreateParamsStreaming` |
+| SDK type | SDK 提供的 TypeScript 类型，只在编译阶段约束字段名称与形状 |
+| Adapter / API implementation | 把 Pi Context 转成 Anthropic 请求对象，并最终调用 SDK 或 `fetch()` 的本地模块 |
+| runtime wiring / 运行时接线 | 让 `streamSimple()` 实际调用新转换函数的代码路径 |
+
+SDK type 不会自动发送请求；请求对象通过测试也不等于 wrapper 已经使用它。
 
 ## 结论先行
 

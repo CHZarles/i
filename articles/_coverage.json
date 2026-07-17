@@ -33,6 +33,54 @@
       }
     ]
   },
+  "anthropic-event-decoding": {
+    "commits": [
+      "1dca7e1"
+    ],
+    "coverage": [
+      {
+        "commit": "1dca7e1",
+        "path": "packages/ai/src/api/anthropic-messages.ts",
+        "anchors": [
+          "RawMessageStreamEvent",
+          "ANTHROPIC_MESSAGE_EVENTS",
+          "message_start",
+          "message_delta",
+          "message_stop",
+          "content_block_start",
+          "content_block_delta",
+          "content_block_stop",
+          "iterateAnthropicEvents",
+          "!response.body",
+          "Attempted to iterate over an Anthropic response with no body",
+          "sawMessageStart",
+          "sawMessageStop",
+          "iterateSseMessages(response.body, signal)",
+          "sse.event === \"error\"",
+          "ANTHROPIC_MESSAGE_EVENTS.has",
+          "continue",
+          "JSON.parse(sse.data)",
+          "Could not parse Anthropic SSE event",
+          "yield event",
+          "Anthropic stream ended before message_stop"
+        ]
+      },
+      {
+        "commit": "1dca7e1",
+        "path": "packages/ai/test/anthropic-events.test.ts",
+        "anchors": [
+          "iterateAnthropicEvents parses a complete Anthropic event stream",
+          "MiniMax-M3",
+          "new Response",
+          "event: message_start",
+          "event: message_stop",
+          "for await",
+          "types.push(event.type)",
+          "assert.deepEqual(types"
+        ]
+      }
+    ]
+  },
   "anthropic-request-parameters": {
     "commits": [
       "93e4d8a"

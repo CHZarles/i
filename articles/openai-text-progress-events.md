@@ -1,7 +1,7 @@
 ---
 title: '文本状态变化通过 start、delta、end 对外发布'
 date: '2026-07-09'
-updated: '2026-07-16'
+updated: '2026-07-17'
 sequence: 7
 tags: ['openai', 'events', 'stream']
 summary: '文本块创建、增量和结束分别产生 Pi 事件，contentIndex 始终指向同一个 AssistantMessage 内容块。'
@@ -13,6 +13,18 @@ draft: false
 ---
 
 ![OpenAI 文本过程事件进入 Pi EventStream 的位置](assets/topology-openai-text-events.svg)
+
+## 名词约定：状态变化需要可定位的过程事件
+
+| 名称 | 本文含义 |
+| --- | --- |
+| progress event | 回复完成前发布的过程事件，例如 `text_start`、`text_delta`、`text_end` |
+| `partial` | 截至当前事件已经形成的完整部分 AssistantMessage |
+| `delta` | 本次事件新增的文本片段，不包含之前累计的内容 |
+| `contentIndex` | 当前内容块在 `AssistantMessage.content[]` 中的稳定位置 |
+| wrapper | 管理整条请求 `start/done/error` 的外层函数；文本 parser 只发布内容块事件 |
+
+`delta` 用于追加显示，`partial` 用于替换当前消息，`contentIndex` 用于确定修改哪一个内容块。
 
 ## 结论先行
 

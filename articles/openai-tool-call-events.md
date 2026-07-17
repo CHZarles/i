@@ -1,7 +1,7 @@
 ---
 title: 'ToolCall 完成后要把停止原因标成 toolUse'
 date: '2026-07-10'
-updated: '2026-07-16'
+updated: '2026-07-17'
 sequence: 9
 tags: ['openai', 'tool-call', 'events']
 summary: 'toolcall_start/delta/end 发布参数形成过程，response.completed 根据内容块设置 stopReason。'
@@ -13,6 +13,18 @@ draft: false
 ---
 
 ![ToolCall 事件与后续工具执行边界的位置](assets/topology-openai-tool-events.svg)
+
+## 名词约定：过程事件与停止原因回答不同问题
+
+| 名称 | 本文含义 |
+| --- | --- |
+| `toolcall_start/delta/end` | 描述模型工具参数如何逐步形成的 Provider 输出事件 |
+| `stopReason` | 最终 AssistantMessage 对“模型为什么停止生成”的统一记录 |
+| `toolUse` | 表示模型已提出 ToolCall，当前轮等待调用方执行工具 |
+| Agent Loop | 读取最终消息、执行本地工具、追加 ToolResult 并决定是否开始下一轮的编排循环 |
+| `tool_execution_*` | 本地工具执行阶段的 Runtime 事件，与 `toolcall_*` 分属不同阶段 |
+
+过程事件服务增量观察，`stopReason` 服务控制流判断；二者不能互相替代。
 
 ## 结论先行
 

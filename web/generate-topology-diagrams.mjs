@@ -117,6 +117,11 @@ const variants = {
     detail: 'HTTP 响应经 SDK / fetch 进入进程；TextDecoder 与跨 chunk 缓冲属于 API implementation。',
     focus: ['adapter', 'transport'], related: ['network', 'events'],
   },
+  'topology-anthropic-events.svg': {
+    title: 'Anthropic 事件解码：SSE 帧到 Provider event 的位置',
+    detail: 'API implementation 从 Response.body 恢复 SSE 帧，再筛选事件名、解析 JSON 并检查消息生命周期。',
+    focus: ['adapter'], related: ['transport', 'network', 'events'],
+  },
   'topology-model-types.svg': {
     title: 'Model / ProviderId / Api：分派协议中的位置',
     detail: 'model.provider 供 Models 查找 Provider；model.api 供 Provider 选择 API implementation。',

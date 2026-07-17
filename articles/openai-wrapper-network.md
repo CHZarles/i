@@ -1,7 +1,7 @@
 ---
 title: 'OpenAI wrapper 把 HTTP SSE 接到纯事件解析器'
 date: '2026-07-10'
-updated: '2026-07-16'
+updated: '2026-07-17'
 sequence: 10
 tags: ['openai', 'http', 'sse']
 summary: 'streamSimple() 负责请求、错误和流终止，parseResponsesSse() 把 SSE 文本交给 processResponsesStream()。'
@@ -13,6 +13,18 @@ draft: false
 ---
 
 ![OpenAI wrapper 与外部 HTTP API 的完整位置](assets/topology-openai-wrapper.svg)
+
+## 名词约定：wrapper 只是协议适配器的外层请求函数
+
+| 名称 | 本文含义 |
+| --- | --- |
+| API implementation / Adapter | 完整的 OpenAI Responses 协议模块，包含消息转换、网络调用与事件映射 |
+| wrapper | Adapter 中包住一次请求生命周期的 `streamSimple()`；它调用下层函数，但不等于整个 Adapter |
+| SSE parser | 把 `text/event-stream` 文本帧转换成 OpenAI event 对象的传输解析器 |
+| Provider event parser | 把 OpenAI event 对象更新为 AssistantMessage 与 Pi progress event 的状态机 |
+| mocked `fetch()` | 测试替身；记录请求并返回本地构造的 Response，不访问外部网络 |
+
+本文的“接线”指 wrapper 依次调用这些独立组件，使数据从 HTTP 请求连续到达 Pi EventStream。
 
 ## 结论先行
 

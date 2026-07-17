@@ -1,7 +1,7 @@
 ---
 title: 'Provider 从模型目录扩展为 Adapter 装配点'
 date: '2026-07-07'
-updated: '2026-07-16'
+updated: '2026-07-17'
 sequence: 4
 tags: ['provider', 'adapter', 'registry']
 summary: 'createProvider() 把模型目录、认证策略和 ProviderStreams 装配成统一调用入口。'
@@ -13,6 +13,18 @@ draft: false
 ---
 
 ![Provider 与 API implementation 在一次模型调用中的位置](assets/topology-provider.svg)
+
+## 名词约定：Provider、Adapter 与 Models 分属三层职责
+
+| 名称 | 本文含义 |
+| --- | --- |
+| Provider | 服务商级装配对象，保存模型目录、认证策略与协议实现入口 |
+| Adapter / API implementation | 处理某一种线上协议的模块，例如 OpenAI Responses 或 Anthropic Messages |
+| `ProviderStreams` | Adapter 向 Provider 暴露的 `stream()` 与 `streamSimple()` 函数集合 |
+| `Models` | 在多个 Provider 之上负责注册、查找与认证解析的集合对象 |
+| registry / 注册表 | 用稳定 ID 保存并查找对象的容器；本文的 Provider 尚未进入完整 Models 注册表 |
+
+Provider 负责装配和委托，Adapter 负责协议与网络，Models 负责跨 Provider 查找。后文按这三个定义讨论代码。
 
 ## 结论先行
 

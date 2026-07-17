@@ -1,7 +1,7 @@
 ---
 title: '第一步为什么是 HTTP 请求：从可验证事实推导 Model、Provider 与 Api'
 date: '2026-07-04'
-updated: '2026-07-16'
+updated: '2026-07-17'
 sequence: 1
 tags: ['openai', 'http', 'types', 'provider']
 summary: '项目先用 27 行 fetch() 证明网络闭环，再依据请求中稳定与变化的部分定义 Model、ProviderId 与 Api。'
@@ -13,6 +13,28 @@ draft: false
 ---
 
 ![从最小网络请求到 Model、Provider 与 Api 的位置](assets/topology-model-types.svg)
+
+## 名词约定：先看清调用链中的角色
+
+这组文章会反复使用下列名称。它们指向不同对象，后文不把它们当作同义词：
+
+| 名称 | 在项目中的固定含义 |
+| --- | --- |
+| Agent Runtime | 组织模型调用、增量事件、工具执行与下一轮对话的一组运行机制 |
+| `Context` | 一次模型调用的 Provider 无关输入，保存 system prompt 与消息历史 |
+| `runAgentLoop()` / Agent Loop | 反复调用模型、消费事件，并在收到 ToolCall 后决定是否继续下一轮的编排循环 |
+| `StreamFn` | Agent Loop 注入的模型 I/O 接口；输入 Model 与 Context，返回 EventStream |
+| `Models` | 按 `model.provider` 查找 Provider，并在请求前解析认证的集合对象 |
+| Provider | 服务商级对象，拥有模型目录、认证策略，并按 `model.api` 选择协议实现 |
+| `Api` | 协议标识字符串，例如 `openai-responses`；它回答“按哪套线上协议调用” |
+| API implementation / 协议适配器 | `src/api/*` 中的本地模块；把 Context 转成协议请求，调用网络，再把 Provider 事件转成 Pi 事件 |
+| wrapper | 协议适配器中的外层请求函数，例如 `streamSimple()`；它管理一次 HTTP 请求的开始、完成与失败，范围小于整个适配器 |
+| SDK / `fetch()` | 发出 HTTP 请求并接收响应的传输依赖 |
+| Provider HTTP API | OpenAI、Anthropic 或 MiniMax 在进程外提供的网络服务 |
+| EventStream | 同时交付生成过程事件和最终 AssistantMessage 的异步输出合同 |
+| SSE | Server-Sent Events，一种按文本帧持续传输服务端事件的 HTTP 响应格式 |
+
+因此，`Api` 是标识，API implementation 是本地代码，Provider HTTP API 是外部网络服务。三者名称相近，拓扑位置不同。
 
 ## 结论先行
 

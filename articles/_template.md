@@ -14,6 +14,12 @@ draft: true
 
 ![当前代码在 Pi Agent Core 调用路径中的位置](assets/topology-example.svg)
 
+## 名词约定
+
+在论证依赖项目术语之前，先定义本文会使用的类型、模块和运行时角色。
+区分名称相近但职责不同的对象，例如 Provider、API implementation、wrapper
+与外部 Provider HTTP API。
+
 ## 背景
 
 ## 要解决的问题

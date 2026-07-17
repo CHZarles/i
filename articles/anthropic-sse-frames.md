@@ -1,7 +1,7 @@
 ---
 title: '从最终 JSON 到 SSE 帧：先恢复 Anthropic 响应的传输边界'
 date: '2026-07-11'
-updated: '2026-07-16'
+updated: '2026-07-17'
 sequence: 12
 tags: ['anthropic', 'sse', 'decoder']
 summary: 'stream:true 改变了响应合同；decodeSseLine() 先把文本行组合成稳定 SSE 帧，JSON 与 Anthropic 事件解析留给下一层。'
@@ -13,6 +13,18 @@ draft: false
 ---
 
 ![Anthropic SSE 分帧在传输与事件解析之间的位置](assets/topology-anthropic-frames.svg)
+
+## 名词约定：行、帧与事件属于三个层次
+
+| 名称 | 本文含义 |
+| --- | --- |
+| SSE line | 以换行符结束的一行传输文本，例如 `event: message_start` |
+| SSE frame | 由空行结束的一组 SSE line；代码中表示为 `ServerSentEvent` |
+| `sse.event` | SSE frame 的事件名字段，仍是普通字符串 |
+| Provider event | 对 `sse.data` 执行 JSON 解析后得到的 Anthropic 协议对象 |
+| Pi event | Adapter 再次转换后交给 Agent Runtime 的统一事件 |
+
+本文只处理 line 到 frame。JSON 解析和 Pi 事件映射分别属于后续两个阶段。
 
 ## 结论先行
 

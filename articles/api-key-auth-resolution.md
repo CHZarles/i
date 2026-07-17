@@ -1,7 +1,7 @@
 ---
 title: 'API Key 先从来源解析成请求可用的 ModelAuth'
 date: '2026-07-04'
-updated: '2026-07-16'
+updated: '2026-07-17'
 sequence: 2
 tags: ['auth', 'provider', 'api-key']
 summary: 'envApiKeyAuth() 把已存凭证或环境变量解析成 ModelAuth；当前 Provider 已挂载策略，运行路径还没有自动调用它。'
@@ -13,6 +13,18 @@ draft: false
 ---
 
 ![Auth 解析在 Pi Agent Core 调用路径中的位置](assets/topology-auth.svg)
+
+## 名词约定：认证策略位于请求之前
+
+| 名称 | 本文含义 |
+| --- | --- |
+| credential | 可保存的凭证记录，例如登录后保存的 API Key |
+| 认证策略 | 从 credential、环境变量等来源中选出本次请求认证数据的规则 |
+| `ModelAuth` | 解析完成后的请求级结果，包含 `apiKey`、headers 或动态 Base URL |
+| API implementation / Adapter | 按具体协议构造 HTTP 请求的本地模块；它消费 `ModelAuth`，但不决定凭证来源 |
+| `Models` | 参考 Pi 中连接 Provider 认证策略与 API implementation 的上层集合对象 |
+
+本文中的 Adapter 指协议适配器，Provider 仍是独立的服务商级对象；`Models` 专指参考 Pi 的运行时集合对象，不作模型数组的泛称。
 
 ## 结论先行
 

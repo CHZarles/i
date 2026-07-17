@@ -1,7 +1,7 @@
 ---
 title: '用 output_index 维护正在形成的文本块'
 date: '2026-07-09'
-updated: '2026-07-16'
+updated: '2026-07-17'
 sequence: 6
 tags: ['openai', 'stream', 'state-machine']
 summary: 'processResponsesStream() 用 textSlots 把 OpenAI output_index 映射到同一个 AssistantMessage 内容块。'
@@ -13,6 +13,18 @@ draft: false
 ---
 
 ![OpenAI 文本状态机在 API implementation 中的位置](assets/topology-openai-text-state.svg)
+
+## 名词约定：事件、解析器与状态机不能混用
+
+| 名称 | 本文含义 |
+| --- | --- |
+| Provider event | OpenAI SSE data 中解析出的协议事件，例如 `response.output_text.delta` |
+| parser / 解析器 | 读取 Provider event，并把它们转换为 Pi 消息状态的函数 |
+| 状态机 | 根据事件类型与先后顺序更新内部状态的一组规则；这里由 `textSlots` 和分支共同实现 |
+| slot | 以 `output_index` 为键保存的临时映射，指向正在形成的 Pi 内容块 |
+| wrapper | 提供 HTTP Response、处理请求级错误并最终发送 `done/error` 的外层函数 |
+
+Provider event 是输入数据，parser 是执行转换的代码，状态机是 parser 遵守的状态变化规则。
 
 ## 结论先行
 

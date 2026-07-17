@@ -1,7 +1,7 @@
 ---
 title: 'ToolCall 参数完成前只能保存 partial JSON'
 date: '2026-07-10'
-updated: '2026-07-16'
+updated: '2026-07-17'
 sequence: 8
 tags: ['openai', 'tool-call', 'state-machine']
 summary: 'toolCallSlots 按 output_index 保存 ToolCall、contentIndex 和 partialJson，直到 output item 完成才解析参数。'
@@ -13,6 +13,18 @@ draft: false
 ---
 
 ![OpenAI ToolCall 状态形成的位置](assets/topology-openai-tool-state.svg)
+
+## 名词约定：模型请求工具与本地执行是两件事
+
+| 名称 | 本文含义 |
+| --- | --- |
+| ToolCall | 模型输出的结构化动作请求，包含工具 ID、名称与参数 |
+| argument delta | Provider 分批发送的一段参数 JSON 文本 |
+| scratch buffer | 只在流式解析期间存在的临时字符串；这里是 `partialJson` |
+| stable state | 可以写入最终 AssistantMessage 的已解析参数对象 |
+| Adapter / API implementation | 把 OpenAI `function_call` 事件转换成 Pi ToolCall 的协议模块，不负责执行工具 |
+
+ToolCall 只表达“模型要求调用什么”。工具查找、参数校验和函数执行属于后续 Agent Loop。
 
 ## 结论先行
 
