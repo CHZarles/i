@@ -44,6 +44,58 @@ test("converts Pi messages into Anthropic messages", () => {
   ]);
 });
 
+test("convertMessages replays Anthropic tool call and tool result", () => {
+  const messages: Message[] = [
+    { role: "user", content: "Weather in SF?", timestamp: 1 },
+    {
+      ...assistant,
+      content: [
+        {
+          type: "toolCall",
+          id: "call_1",
+          name: "get_weather",
+          arguments: { city: "SF" },
+        },
+      ],
+      stopReason: "toolUse",
+    },
+    {
+      role: "toolResult",
+      toolCallId: "call_1",
+      toolName: "get_weather",
+      content: [{ type: "text", text: '{"temperature":18}' }],
+      isError: false,
+      timestamp: 2,
+    },
+  ];
+
+  assert.deepEqual(convertMessages(messages), [
+    { role: "user", content: "Weather in SF?" },
+    {
+      role: "assistant",
+      content: [
+        {
+          type: "tool_use",
+          id: "call_1",
+          name: "get_weather",
+          input: { city: "SF" },
+        },
+      ],
+    },
+    {
+      role: "user",
+      content: [
+        {
+          type: "tool_result",
+          tool_use_id: "call_1",
+          content: '{"temperature":18}',
+          is_error: false,
+        },
+      ],
+    },
+  ]);
+});
+
 test("builds MiniMax Anthropic request parameters", () => {
   const model = minimaxProvider().getModels()[0];
   assert.ok(model);

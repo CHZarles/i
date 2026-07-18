@@ -378,6 +378,10 @@ function promptFromContext(context: Context): string {
   return lastUser?.content ?? "";
 }
 
+function textFromTextBlocks(content: { type: "text"; text: string }[]): string {
+  return content.map((block) => block.text).join("");
+}
+
 export function convertMessages(messages: Message[]): MessageParam[] {
   const params: MessageParam[] = [];
 
@@ -390,7 +394,36 @@ export function convertMessages(messages: Message[]): MessageParam[] {
       continue;
     }
 
-    const content: { type: "text"; text: string }[] = [];
+    // Pi records local tool execution as `toolResult`; Anthropic/MiniMax
+    // replays it as a user message containing a `tool_result` block.
+    if (message.role === "toolResult") {
+      params.push({
+        role: "user",
+        content: [
+          {
+            type: "tool_result",
+            tool_use_id: message.toolCallId,
+            content: textFromTextBlocks(message.content),
+            is_error: message.isError,
+          },
+        ],
+      } as MessageParam);
+      continue;
+    }
+
+    if (message.role !== "assistant") {
+      continue;
+    }
+
+    const content: (
+      | { type: "text"; text: string }
+      | {
+          type: "tool_use";
+          id: string;
+          name: string;
+          input: Record<string, unknown>;
+        }
+    )[] = [];
 
     for (const block of message.content) {
       if (block.type === "text") {
@@ -399,13 +432,22 @@ export function convertMessages(messages: Message[]): MessageParam[] {
           text: block.text,
         });
       }
+
+      if (block.type === "toolCall") {
+        content.push({
+          type: "tool_use",
+          id: block.id,
+          name: block.name,
+          input: block.arguments,
+        });
+      }
     }
 
     if (content.length > 0) {
       params.push({
         role: "assistant",
         content,
-      });
+      } as MessageParam);
     }
   }
 
