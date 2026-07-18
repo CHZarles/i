@@ -166,13 +166,14 @@ export interface AssistantMessage {
 
 // 对话中的一条消息。
 // 通过 role 字段可以区分具体是哪种。
-export type Message = UserMessage | AssistantMessage;
+export type Message = UserMessage | AssistantMessage | ToolResultMessage;
 
 // 调用模型时传入的上下文。
 // 本质就是当前对话历史。
 export interface Context {
   systemPrompt?: string;
   messages: Message[];
+  tools?: Tool[];
 }
 
 export interface ToolCall {
@@ -283,3 +284,175 @@ export interface ProviderStreams {
 // TApi 现在只是预留参数，暂时没有参与计算。
 export type ApiStreamOptions<TApi extends Api> = StreamOptions &
   Record<string, unknown>;
+
+/*
+
+**这三个类型描述的是"一次工具调用回合"：**
+
+| 类型 | 作用 |
+|------|------|
+| `Tool` | 告诉模型："你可以像这样调用 `get_weather`" |
+| `JsonSchema` | 告诉运行时/模型："参数必须长这个样子" |
+| `ToolResultMessage` | 记录："我们跑了这个工具，这是结果" |
+
+*/
+
+export type JsonSchema = {
+  type?:
+    | "object"
+    | "string"
+    | "number"
+    | "integer"
+    | "boolean"
+    | "array"
+    | "null";
+  description?: string;
+  properties?: Record<string, JsonSchema>;
+  required?: string[];
+  items?: JsonSchema;
+};
+
+export interface Tool {
+  name: string;
+  description: string;
+  parameters: JsonSchema;
+}
+
+export interface ToolResultMessage {
+  role: "toolResult";
+  toolCallId: string;
+  toolName: string;
+  content: TextContent[];
+  isError: boolean;
+  timestamp: number;
+}
+/*
+**具体例子：**
+
+首先，你定义一个本地工具：
+
+```ts
+const weatherTool: Tool = {
+  name: "get_weather",
+  description: "获取某个城市的当前天气",
+  parameters: {
+    type: "object",
+    required: ["city", "units"],
+    properties: {
+      city: { type: "string", description: "城市名，例如 Shanghai" },
+      units: { type: "string", description: "温度单位：celsius 或 fahrenheit" },
+      forecastDays: { type: "integer", description: "预报天数" },
+    },
+  },
+};
+```
+
+把它放进模型上下文：
+
+```ts
+const context: Context = {
+  messages: [
+    { role: "user", content: "上海天气怎么样？", timestamp: Date.now() },
+  ],
+  tools: [weatherTool],
+};
+```
+
+Provider 适配器会把 `weatherTool.parameters` 发给 OpenAI/MiniMax，这样模型就知道哪些参数是合法的。
+
+然后模型返回一条带工具调用的 assistant 消息：
+
+```ts
+const assistant: AssistantMessage = {
+  role: "assistant",
+  content: [
+    {
+      type: "toolCall",
+      id: "call_1",
+      name: "get_weather",
+      arguments: { city: "Shanghai", units: "celsius", forecastDays: 1 },
+    },
+  ],
+  api: "anthropic-messages",
+  provider: "minimax",
+  model: "minimax-text-01",
+  usage: emptyUsage,
+  stopReason: "toolUse",
+  timestamp: Date.now(),
+};
+```
+
+执行前，运行时先做校验：
+
+```ts
+const args = validateToolCall(context.tools, assistant.content[0]);
+```
+
+校验检查：
+
+```ts
+weatherTool.parameters.required  // ["city", "units"]
+assistant.content[0].arguments   // { city: "Shanghai", units: "celsius", forecastDays: 1 }
+```
+
+所以校验通过。
+
+然后你的 agent 循环真正跑本地函数：
+
+```ts
+const result = { temperature: 31, condition: "Cloudy" };
+```
+
+并把它记录成一条对话消息：
+
+```ts
+const toolResult: ToolResultMessage = {
+  role: "toolResult",
+  toolCallId: "call_1",
+  toolName: "get_weather",
+  content: [
+    { type: "text", text: '{"temperature":31,"condition":"Cloudy"}' },
+  ],
+  isError: false,
+  timestamp: Date.now(),
+};
+```
+
+现在下一次调用模型时，它看到的历史是：
+
+```ts
+[ userMessage, assistantToolCallMessage, toolResultMessage ]
+```
+
+Provider 适配器把这段历史转换成对应 provider 的传输格式。然后模型就能回答：
+
+```ts
+{
+  role: "assistant",
+  content: [{ type: "text", text: "上海多云，大约 31℃。" }],
+  stopReason: "stop",
+}
+```
+
+**错误参数的例子：**
+
+```ts
+arguments: { city: "Shanghai", units: "celsius", forecastDays: "tomorrow" }
+```
+
+会失败，因为 schema 规定：
+
+```ts
+forecastDays: { type: "integer" }
+```
+
+但模型给的是字符串。
+
+**所以各自的用途是：**
+
+- `Tool` = 能力定义（有什么工具）
+- `JsonSchema` = 参数契约（参数长什么样）
+- `ToolCall` = 模型请求执行某个能力
+- `ToolResultMessage` = 本地运行时的回答，追加回对话里
+
+*/

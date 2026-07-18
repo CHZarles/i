@@ -295,6 +295,10 @@ export function convertResponsesMessages(
       continue;
     }
 
+    if (message.role !== "assistant") {
+      continue;
+    }
+
     // assistant history 是"模型之前说过什么"。
     // Pi 内部把 assistant content 存成 block 数组：
     //   [{ type: "text", text: "Hi" }, { type: "toolCall", ... }]
