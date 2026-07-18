@@ -17,49 +17,58 @@ import type {
   response.output_item.done = one output block is finished
   response.completed        = whole model response is finished
 
-
   One assistant response
     ├─ output item 0: text message
     ├─ output item 1: tool call
     └─ final response metadata
 
   OpenAI may send:
-
   response.output_item.done   // text block finished
   response.output_item.done   // tool call block finished
   response.completed          // whole response finished
 */
 
+/*
+   provider 适配层（parser）内部的函数。                                                      
+
+  - openaiStream：OpenAI 原始事件流（输入，它消费）
+  - output：一个空的 AssistantMessage（它就地填充）
+  - stream：Pi 的 AssistantMessageEventStream（它往里 push 事件）
+
+  它的职责是翻译：把 OpenAI Responses 协议的事件（response.output_text.delta、response.function_call_arguments.delta 等）
+  翻译成 Pi 内部的统一事件（text_start/text_delta/toolcall_start…）。
+
+  tool loop / session ─调用─▶ provider.stream()
+                                      │ 内部调用
+                                      ▼
+                      processResponsesStream(openaiStream, output, stream, model)
+                                      │ 消费
+                                      ▼
+                            OpenAI 原始 SSE 事件
+*/
+
 export async function processResponsesStream(
-  // The provider event source. In the test this is an async generator;
-  // later it can be real SSE/network events.
+  // OpenAI 原始事件源；测试中为异步生成器，实际可来自 SSE/网络。
   openaiStream: AsyncIterable<ResponseStreamEvent>,
 
-  // The single assistant message being built in-place.
-  // This function mutates output.content, output.usage, output.responseId.
-  // 这个数据结构面向, the assistant message being built
+  // 就地构建的单个 AssistantMessage；会修改 content、usage 和 responseId。
   output: AssistantMessage,
 
-  // The Pi event stream for live progress.
-  // We mutate output and also push text_start/text_delta so upper layers can
-  // render streaming text before the final assistant message is complete.
-  // 这个数据结构面向, the notification channel while it is being built
+  // Pi 实时事件流；构建 output 时同步推送 text_start/text_delta，
+  // 供上层在消息完成前渲染增量文本。
   stream: AssistantMessageEventStream,
 
-  // Model metadata is not needed in the first slice, but the full parser uses it
-  // for provider/model-specific details such as cost and compatibility.
+  // 首个切片暂不使用模型元数据；完整解析器会用它处理成本、
+  // 兼容性等供应商/模型特定信息。
   _model: Model<"openai-responses">,
 ): Promise<void> {
-  // OpenAI usually gives us one network stream, but that stream can contain
-  // multiple output items: text, tool calls, reasoning, etc.
-  // output_index routes each delta to the Pi content block it belongs to.
-  // 普通 chat 通常只有一个 text output，但 Responses 协议用 output_index
-  // 标记每个 output item。event.type 只告诉我们这是 text delta；
-  // output_index 才告诉我们要更新哪一个 text block。
+  // 一个 Responses stream 里可能同时有 text/tool/reasoning 等多个 output item。
+  // output_index 用来把后续 delta 接回对应的 Pi content block。
   const textSlots = new Map<
     number,
     { block: { type: "text"; text: string }; contentIndex: number }
   >();
+
   const toolCallSlots = new Map<
     number,
     { block: ToolCall; contentIndex: number; partialJson: string }

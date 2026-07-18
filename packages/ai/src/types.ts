@@ -222,8 +222,6 @@ export type AssistantMessageEvent =
       partial: AssistantMessage;
     };
 
-// 先去看 event-stream.ts 再回来看下面的👇
-
 // 一个 provider stream 函数的标准形状。
 //
 // TApi:
@@ -246,17 +244,16 @@ export type StreamFunction<
 
   // 本次调用的可选参数，比如 apiKey、maxTokens。
   options?: TOptions,
-) => // 返回 assistant 消息事件流。
+) => AssistantMessageEventStream;
+
+// 返回 assistant 消息事件流。
 // 调用方可以 for await 读取过程事件，
 // 也可以 await stream.result() 拿最终 AssistantMessage。
-AssistantMessageEventStream;
 
-// 定义一个 API adapter / provider stream 模块必须提供哪些方法。
-//  StreamFunction 是一个调用函数的形状；
-//  ProviderStreams 是 provider 要交出来的一组调用函数。
+// ProviderStreams 是一个形状契约（shape contract）。
+// 规定任何想要接入某个 provider 的 API adapter，必须提供这两个函数。
 export interface ProviderStreams {
-  // 完整 stream 调用。
-  //
+  // 完整 stream 调用:
   // 输入模型、上下文和请求选项，
   // 返回 assistant 消息事件流。
   stream(
@@ -265,11 +262,9 @@ export interface ProviderStreams {
     options?: StreamOptions,
   ): AssistantMessageEventStream;
 
-  // 简化 stream 调用。
-  //
+  // 简化 stream 调用:
   // 当前 SimpleStreamOptions 和 StreamOptions 一样；
   // 但语义上它表示“最小能力调用”。
-  //
   // 以后 stream 可以支持更复杂能力，
   // streamSimple 仍然可以保留简单文本调用入口。
   streamSimple(
