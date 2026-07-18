@@ -54,3 +54,49 @@ test("convertResponsesMessages maps Pi context to OpenAI Responses input", () =>
     },
   ]);
 });
+
+test("convertResponsesMessages replays OpenAI tool call and tool result", () => {
+  const context: Context = {
+    messages: [
+      { role: "user", content: "Weather in SF?", timestamp: 1 },
+      {
+        ...assistant, //“copy all fields from assistant into this new object
+        content: [
+          {
+            type: "toolCall",
+            id: "call_1",
+            name: "get_weather",
+            arguments: { city: "SF" },
+          },
+        ],
+        stopReason: "toolUse",
+      },
+      {
+        role: "toolResult",
+        toolCallId: "call_1",
+        toolName: "get_weather",
+        content: [{ type: "text", text: '{"temperature":18}' }],
+        isError: false,
+        timestamp: 2,
+      },
+    ],
+  };
+
+  const input = convertResponsesMessages(model, context);
+
+  assert.deepEqual(input, [
+    { role: "user", content: [{ type: "input_text", text: "Weather in SF?" }] },
+    {
+      type: "function_call",
+      id: "fc_call_1",
+      call_id: "call_1",
+      name: "get_weather",
+      arguments: '{"city":"SF"}',
+    },
+    {
+      type: "function_call_output",
+      call_id: "call_1",
+      output: '{"temperature":18}',
+    },
+  ]);
+});

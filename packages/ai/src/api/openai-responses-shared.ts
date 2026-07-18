@@ -234,6 +234,12 @@ export async function processResponsesStream(
   }
 }
 
+// ToolResultMessage.content is TextContent[];
+// OpenAI wants one string in output
+function textFromTextBlocks(content: TextContent[]): string {
+  return content.map((block) => block.text).join("");
+}
+
 // 把 Pi 内部的 Context 翻译成 OpenAI Responses SDK 能发送的 input。
 //
 // Runtime shape:
@@ -295,8 +301,32 @@ export function convertResponsesMessages(
       continue;
     }
 
+    if (message.role === "toolResult") {
+      input.push({
+        type: "function_call_output",
+        call_id: message.toolCallId,
+        output: textFromTextBlocks(message.content),
+      } as ResponseInput[number]); // `ResponseInput[number]` means one item in OpenAI's input array.
+      continue;
+    }
+
+    // 下面的代码明确只处理 assistant
     if (message.role !== "assistant") {
       continue;
+    }
+
+    //  Pi stores model-requested tools as assistant content blocks;
+    //  OpenAI replays them as separate function_call items.
+    for (const block of message.content) {
+      if (block.type !== "toolCall") continue;
+
+      input.push({
+        type: "function_call",
+        id: `fc_${block.id}`,
+        call_id: block.id,
+        name: block.name,
+        arguments: JSON.stringify(block.arguments),
+      } as ResponseInput[number]);
     }
 
     // assistant history 是"模型之前说过什么"。
